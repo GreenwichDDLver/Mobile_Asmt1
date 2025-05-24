@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/banner_header.dart';
 import '../widgets/food_item.dart';
 import '../widgets/bottom_cart.dart';
+import 'checkout_page.dart'; // 导入checkout页面
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -21,14 +22,22 @@ class _MenuPageState extends State<MenuPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Order'),
-        backgroundColor: Colors.orange[100],
+        backgroundColor: Colors.yellow[200],
       ),
       body: Column(
         children: [
           const BannerHeader(),
           const Divider(),
           Expanded(child: _buildBody()),
-          const BottomCart(),
+          // 传递跳转到checkout的回调函数
+          BottomCart(
+            onCheckoutPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CheckoutPage()),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -45,7 +54,9 @@ class _MenuPageState extends State<MenuPage> {
               color: Colors.yellow[50],
               borderRadius: BorderRadius.circular(16),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16), // 用padding代替margin，避免宽度累加
+            padding: const EdgeInsets.symmetric(
+              vertical: 16,
+            ), // 用padding代替margin，避免宽度累加
             child: ListView.builder(
               padding: EdgeInsets.zero,
               itemCount: categories.length,
@@ -98,11 +109,7 @@ class _CategoryTile extends StatelessWidget {
   final String title;
   final bool selected;
   final VoidCallback? onTap;
-  const _CategoryTile({
-    required this.title,
-    this.selected = false,
-    this.onTap,
-  });
+  const _CategoryTile({required this.title, this.selected = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -115,21 +122,22 @@ class _CategoryTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? Colors.orangeAccent.withOpacity(0.8) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: Colors.orangeAccent.withOpacity(0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+          boxShadow:
+              selected
+                  ? [
+                    BoxShadow(
+                      color: Colors.orangeAccent.withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                  : [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
