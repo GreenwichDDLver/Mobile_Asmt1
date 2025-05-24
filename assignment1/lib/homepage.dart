@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
 import 'package:assignment1/SearchPagePlaceholder.dart';
-import 'package:assignment1/restaurant_detail_placeholder.dart';
+import 'package:assignment1/pages/menu_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -334,15 +334,14 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RestaurantDetailPlaceholder(
-                      name: RestaurantList[index].name,
-                    ),
-                  ),
-                );
-              },
+    Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const MenuPage(),
+    ),
+  );
+},
+
               child: Container(
                 height: 120,
                 decoration: BoxDecoration(
