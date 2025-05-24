@@ -1,73 +1,71 @@
 import 'package:flutter/material.dart';
-import '../widgets/banner_header.dart';
-import '../widgets/food_item.dart';
-import '../widgets/bottom_cart.dart';
 
-class MenuPage extends StatefulWidget {
-  const MenuPage({super.key});
+class FoodItem extends StatelessWidget {
+  final String imagePath;
+  final String title;
+  final String sub;
+  final double price;
+  final double imageCornerRadius;
 
-  @override
-  State<MenuPage> createState() => _MenuPageState();
-}
+  const FoodItem({
+    Key? key,
+    required this.imagePath,
+    required this.title,
+    required this.sub,
+    required this.price,
+    this.imageCornerRadius = 0, // 默认无圆角
+  }) : super(key: key);
 
-class _MenuPageState extends State<MenuPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF9E5), 
-      appBar: AppBar(title: const Text('Order')),
-      body: Column(
-        children: [
-          const BannerHeader(),
-          const Divider(),
-          Expanded(child: _buildBody()),
-          const BottomCart(),
-        ],
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(imageCornerRadius),
+              child: Image.asset(
+                imagePath,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    sub,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '¥ $price',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildBody() {
-    return Row(
-      children: [
-        Container(
-          width: 100,
-          color: Colors.yellow[200],
-          child: ListView(
-            children: const [
-              ListTile(title: Text('Best Sell')),
-              ListTile(title: Text('Double Set')),
-              ListTile(title: Text('Steamed Dumpling')),
-              ListTile(title: Text('Porridge')),
-              ListTile(title: Text('Beverage')),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView(
-            children: const [
-              FoodItem(
-                imagePath: 'assets/images/item1.jpg',
-                title: 'Steam Dumpling',
-                sub: 'Monthly sales 1000+ The Best Seller',
-                price: 12,
-              ),
-              FoodItem(
-                imagePath: 'assets/images/item2.jpg',
-                title: 'Dumpling',
-                sub: 'Monthly sales 300+ Public Recommend',
-                price: 13,
-              ),
-              FoodItem(
-                imagePath: 'assets/images/item3.jpg',
-                title: 'Steam Bread',
-                sub: 'Monthly sales 200+ Recommend',
-                price: 13,
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
