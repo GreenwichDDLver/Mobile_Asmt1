@@ -44,7 +44,7 @@ class FoodItem extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(sub, style: const TextStyle(color: Colors.grey)),
                 const SizedBox(height: 5),
-                Text('¥$price', style: const TextStyle(color: Colors.red)),
+                Text("\$${price}", style: const TextStyle(color: Colors.red)),
               ],
             ),
           ),
