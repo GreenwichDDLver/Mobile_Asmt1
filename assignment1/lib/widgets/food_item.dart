@@ -19,11 +19,20 @@ class FoodItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.yellow[50], // 设置淡黄色背景
       margin: const EdgeInsets.all(8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(imagePath, width: 80, height: 80, fit: BoxFit.cover),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12), 
+            child: Image.asset(
+              imagePath,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(

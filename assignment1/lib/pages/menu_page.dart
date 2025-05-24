@@ -1,68 +1,156 @@
 import 'package:flutter/material.dart';
+import '../widgets/banner_header.dart';
+import '../widgets/food_item.dart';
+import '../widgets/bottom_cart.dart';
 
-class FoodItem extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String sub;
-  final double price;
-  final double imageCornerRadius;
+class MenuPage extends StatefulWidget {
+  const MenuPage({super.key});
 
-  const FoodItem({
-    Key? key,
-    required this.imagePath,
-    required this.title,
-    required this.sub,
-    required this.price,
-    this.imageCornerRadius = 0, // 默认无圆角
-  }) : super(key: key);
+  @override
+  State<MenuPage> createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> {
+  int selectedIndex = 0;
+
+  final categories = ['Noodles', 'Dumpling', 'Rice', 'Porridge', 'Beverage'];
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(imageCornerRadius),
-              child: Image.asset(
-                imagePath,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Order'),
+        backgroundColor: Colors.yellow[200],
+      ),
+      body: Column(
+        children: [
+          const BannerHeader(),
+          const Divider(),
+          Expanded(child: _buildBody()),
+          const BottomCart(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return Padding(
+      padding: const EdgeInsets.all(8), // 给整体添加内边距，避免溢出
+      child: Row(
+        children: [
+          Container(
+            width: 120,
+            decoration: BoxDecoration(
+              color: Colors.yellow[50],
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+            padding: const EdgeInsets.symmetric(vertical: 16), // 用padding代替margin，避免宽度累加
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                return _CategoryTile(
+                  title: categories[index],
+                  selected: selectedIndex == index,
+                  onTap: () {
+                    setState(() {
+                      selectedIndex = index;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8), // 左右间距
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: const [
+                FoodItem(
+                  imagePath: 'assets/images/item1.jpg',
+                  title: 'Steam Dumpling',
+                  sub: 'Monthly sales 1000+ The Best Seller',
+                  price: 12,
+                ),
+                FoodItem(
+                  imagePath: 'assets/images/item2.jpg',
+                  title: 'Dumpling',
+                  sub: 'Monthly sales 300+ Public Recommend',
+                  price: 13,
+                ),
+                FoodItem(
+                  imagePath: 'assets/images/item3.jpg',
+                  title: 'Steam Bread',
+                  sub: 'Monthly sales 200+ Recommend',
+                  price: 13,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryTile extends StatelessWidget {
+  final String title;
+  final bool selected;
+  final VoidCallback? onTap;
+  const _CategoryTile({
+    required this.title,
+    this.selected = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        decoration: BoxDecoration(
+          color: selected ? Colors.orangeAccent.withOpacity(0.8) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.orangeAccent.withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    sub,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '¥ $price',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
                 ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selected ? Colors.white : Colors.orangeAccent,
               ),
-            )
+            ),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: selected ? Colors.white : Colors.orangeAccent,
+              ),
+            ),
           ],
         ),
       ),
