@@ -4,6 +4,7 @@ import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
 import 'package:assignment1/pages/menu_page.dart';
 import 'package:assignment1/pages/search_page.dart';
+import 'package:assignment1/pages/profile_page.dart'; // Add this import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -108,6 +109,39 @@ class _HomePageState extends State<HomePage> {
 
         ],
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 15),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              );
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.person,
+                color: Colors.orange[700],
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
