@@ -21,7 +21,7 @@ class _MenuPageState extends State<MenuPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Order'),
-        backgroundColor: Colors.yellow[200],
+        backgroundColor: Colors.orange[100],
       ),
       body: Column(
         children: [

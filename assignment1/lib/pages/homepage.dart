@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
 
   AppBar _appBarFunction() {
     return AppBar(
-      backgroundColor: Colors.yellow[200],
+      backgroundColor: Colors.orange[100],
       elevation: 0,
       centerTitle: false,
       title: Row(
