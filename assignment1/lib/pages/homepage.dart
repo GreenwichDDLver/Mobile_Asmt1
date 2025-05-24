@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
-import 'package:assignment1/SearchPagePlaceholder.dart';
 import 'package:assignment1/pages/menu_page.dart';
-
+import 'package:assignment1/pages/search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -119,7 +118,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SearchPagePlaceholder()),
+          MaterialPageRoute(builder: (context) => const SearchPage()),
         );
       },
       child: Container(
