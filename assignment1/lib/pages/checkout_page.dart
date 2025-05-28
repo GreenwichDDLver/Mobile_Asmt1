@@ -44,7 +44,7 @@ class CheckoutPage extends StatelessWidget {
                   // Delivery Section
                   _buildInfoRow(
                     'DELIVERY',
-                    'Free\nStandard | 3-4 days',
+                    'Free\nStandard | 30-40 mins',
                     showArrow: true,
                     onTap: () {},
                   ),
@@ -158,7 +158,7 @@ class CheckoutPage extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: Colors.orange[500],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
