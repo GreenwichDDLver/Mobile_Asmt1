@@ -4,8 +4,7 @@ import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
 import 'package:assignment1/pages/menu_page.dart';
 import 'package:assignment1/pages/search_page.dart';
-import 'package:assignment1/pages/profile_page.dart';
-import 'package:assignment1/pages/order_page.dart'; // Add this import
+import 'package:assignment1/pages/profile_page.dart'; // Add this import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -47,34 +46,6 @@ class _HomePageState extends State<HomePage> {
                 _searchField(context),
                 const SizedBox(height: 20),
                 _categorySection(),
-SizedBox(height: 10),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const OrderPage()),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.orange[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        "My Order",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 20),
                 _recentActivitiesSection(),
                 _bannerSection(),
@@ -283,6 +254,8 @@ SizedBox(height: 10),
     );
   }
 
+
+  // 最近活动部分
   Column _recentActivitiesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +271,7 @@ SizedBox(height: 10),
             ),
           ),
         ),
-
+        //const SizedBox(height: 10),
       ],
     );
   }
@@ -368,6 +341,7 @@ SizedBox(height: 10),
     );
   }
 
+  //商家列表
   Column _RestaurantListSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +392,7 @@ SizedBox(height: 10),
 
                 child: Row(
                   children: [
-
+                    // 左侧图片：加 Padding 实现左边距
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: ClipRRect(
