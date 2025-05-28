@@ -14,7 +14,7 @@ class MenuPage extends StatefulWidget {
 class _MenuPageState extends State<MenuPage> {
   int selectedIndex = 0;
 
-  final categories = ['Noodles', 'Dumpling', 'Rice', 'Porridge', 'Beverage'];
+  final categories = ['Best Sales','Noodles', 'Dumpling', 'Rice', 'Porridge', 'Beverage'];
 
   @override
   Widget build(BuildContext context) {
@@ -22,24 +22,43 @@ class _MenuPageState extends State<MenuPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Order'),
-        backgroundColor: Colors.yellow[200],
+        backgroundColor: Colors.orange[100],
       ),
-      body: Column(
-        children: [
-          const BannerHeader(),
-          const Divider(),
-          Expanded(child: _buildBody()),
-          // 传递跳转到checkout的回调函数
-          BottomCart(
-            onCheckoutPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CheckoutPage()),
-              );
-            },
-          ),
-        ],
+      body: Stack(
+  children: [
+    // 背景图片层（固定在底部居中）
+    Positioned(
+      bottom: 78,
+      left: 110,
+      right: 0,
+      child: Center(
+        child: Image.asset(
+          'assets/images/usagi7.png',
+          width: 115, // 调整控制图片大小
+          fit: BoxFit.contain,
+        ),
       ),
+    ),
+
+    
+    Column(
+      children: [
+        const BannerHeader(),
+        const Divider(),
+        Expanded(child: _buildBody()),
+        BottomCart(
+          onCheckoutPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CheckoutPage()),
+            );
+          },
+        ),
+      ],
+    ),
+  ],
+),
+
     );
   }
 
@@ -154,7 +173,7 @@ class _CategoryTile extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: selected ? Colors.white : Colors.orangeAccent,
               ),

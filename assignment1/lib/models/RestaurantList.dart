@@ -22,6 +22,18 @@ class RestaurantListModel {
 
     RestaurantList.add(
       RestaurantListModel(
+        name: "Hang Zhou Flavor",
+        iconPath: "assets/images/logo4.jpg",
+        score: "4.4",
+        duration: "40mins",
+        fee: "\$1.00",
+        boxColor: const Color(0xffC58BF2),
+      ),
+    );
+
+
+    RestaurantList.add(
+      RestaurantListModel(
         name: "Mcdonald",
         iconPath: "assets/images/Mcd.jpg",
         score: "4.8",
@@ -64,16 +76,7 @@ class RestaurantListModel {
       ),
     );
 
-    RestaurantList.add(
-      RestaurantListModel(
-        name: "Hang Zhou Flavor",
-        iconPath: "assets/images/logo4.jpg",
-        score: "4.2",
-        duration: "45mins",
-        fee: "\$1.00",
-        boxColor: const Color(0xffC58BF2),
-      ),
-    );
+
 
     return RestaurantList;
   }
