@@ -4,7 +4,8 @@ import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
 import 'package:assignment1/pages/menu_page.dart';
 import 'package:assignment1/pages/search_page.dart';
-import 'package:assignment1/pages/profile_page.dart'; // Add this import
+import 'package:assignment1/pages/profile_page.dart'; 
+import 'package:assignment1/widgets/cart_panel.dart'; 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,6 +26,8 @@ class _HomePageState extends State<HomePage> {
     "assets/images/banner3.png",
   ];
   int _currentBannerIndex = 0;
+
+  bool _showCartPanel = false;
 
   @override
   void dispose() {
@@ -54,37 +57,54 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+
+          // 购物车按钮
           Positioned(
             bottom: 120,
             right: 20,
-            child: Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 4),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _showCartPanel = !_showCartPanel;
+                });
+              },
+              child: Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    "assets/icons/trolley.svg",
+                    width: 35,
+                    height: 30,
                   ),
-                ],
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  "assets/icons/trolley.svg",
-                  width: 35,
-                  height: 30,
                 ),
               ),
             ),
           ),
+
+          // 这里替换成调用你拆出来的 CartPanel 组件
+          if (_showCartPanel)
+            CartPanel(
+              onClose: () {
+                setState(() {
+                  _showCartPanel = false;
+                });
+              },
+            ),
         ],
       ),
-
     );
-
   }
 
   AppBar _appBarFunction() {
@@ -475,5 +495,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
-  }
+  }   
 }
+
