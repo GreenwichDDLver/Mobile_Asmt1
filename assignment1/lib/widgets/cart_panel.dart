@@ -38,7 +38,7 @@ class CartPanel extends StatelessWidget {
                 child: Center(
                   child: Image.asset(
                     'assets/images/usagi6.png',
-                    width: 10, // 控制图片宽度
+                    width: 135, // 控制图片宽度
                     fit: BoxFit.contain,
                   ),
                 ),

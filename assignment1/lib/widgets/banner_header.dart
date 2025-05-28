@@ -27,13 +27,17 @@ class BannerHeader extends StatelessWidget {
                 // 评分和配送时间一行
                 Row(
                   children: [
-                    const Icon(Icons.star, size: 16, color: Color.fromARGB(255, 255, 232, 26)),
+                    const Icon(Icons.star, size: 16, color: Color.fromARGB(255, 255, 187, 0)),
                     const SizedBox(width: 4),
                     const Text(
-                      '4.9',
+                      '4.4',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(width: 20),
+                    const Text(
+                      '40min | ',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
                     SvgPicture.asset(
                       "assets/icons/delivery.svg",
                       width: 14,
@@ -42,7 +46,7 @@ class BannerHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     const Text(
-                      '40min',
+                      '\$1.0',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],

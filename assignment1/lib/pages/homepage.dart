@@ -6,6 +6,7 @@ import 'package:assignment1/pages/menu_page.dart';
 import 'package:assignment1/pages/search_page.dart';
 import 'package:assignment1/pages/profile_page.dart'; 
 import 'package:assignment1/widgets/cart_panel.dart'; 
+import 'package:assignment1/widgets/homepage_banner.dart'; 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -119,7 +120,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 5),
           Expanded(
             child: Text(
-              "Shanghai", // 你可以替换为动态定位
+              "Shanghai", // 定位
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Colors.black,
@@ -206,6 +207,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+//分类表
   Column _categorySection() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,22 +295,67 @@ class _HomePageState extends State<HomePage> {
   );
 }
 
+//banner
 Widget _bannerSection() {
-    return Column(
-      children: [
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 160,
-          child: PageView.builder(
-            controller: _bannerController,
-            itemCount: bannerImages.length,
-            onPageChanged: (index) {
-              setState(() {
-                _currentBannerIndex = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              return Padding(
+  final bannerDescriptions = [
+  '''
+Enjoy a delightful pasta day! 🍝
+
+✨ Special Offers:
+- Get a 50% discount on your second pasta dish.
+- Collect exclusive pasta coupons valid for this week only.
+
+📅 Limited-time offer. Grab it while it lasts!
+''',
+  '''
+🔥 Big Weekend Deal! 🛍️
+
+🎁 Up to 35% OFF on selected menu items.
+
+💡 Use Code: WEEKEND35 at checkout
+📌 Valid on orders over \$15.
+🕒 Only available from Friday to Sunday!
+
+Don't miss your chance to save big this weekend!
+''',
+  '''
+🍕 Pizza Time Deal! Just \$3.99
+
+Indulge in our cheesy pizza offer:
+- Classic Margherita, only \$3.99!
+- No hidden fees. No extra charges.
+
+📅 Available daily from 2 PM to 6 PM.
+''',
+
+  ];
+
+  return Column(
+    children: [
+      const SizedBox(height: 10),
+      SizedBox(
+        height: 160,
+        child: PageView.builder(
+          controller: _bannerController,
+          itemCount: bannerImages.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentBannerIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => BannerPanel(
+                    imagePath: bannerImages[index],
+                    description: bannerDescriptions[index],
+                    onClose: () => Navigator.of(context).pop(),
+                  ),
+                );
+              },
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Container(
                   decoration: BoxDecoration(
@@ -322,7 +369,6 @@ Widget _bannerSection() {
                       ),
                     ],
                   ),
-
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
@@ -333,32 +379,33 @@ Widget _bannerSection() {
                     ),
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(bannerImages.length, (index) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: _currentBannerIndex == index ? 12 : 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: _currentBannerIndex == index ? Colors.black : Colors.grey[400],
-                borderRadius: BorderRadius.circular(4),
               ),
             );
-          }),
+          },
         ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
+      ),
+      const SizedBox(height: 10),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(bannerImages.length, (index) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: _currentBannerIndex == index ? 12 : 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: _currentBannerIndex == index ? Colors.black : Colors.grey[400],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          );
+        }),
+      ),
+      const SizedBox(height: 20),
+    ],
+  );
+}
 
-
+//banner的标题
 Column _recentActivitiesSection() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
