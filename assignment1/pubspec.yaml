@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  video_player: ^2.8.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -103,6 +104,8 @@ flutter:
     - assets/images/mixuemerchant.jpg
     - assets/images/noodlemerchant.jpg
     - assets/images/UserImage.jpg
+    - assets/images/background.jpg
+    - assets/videos/background.mp4
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:video_player/video_player.dart';
 import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
 import 'package:assignment1/pages/menu_page.dart';
@@ -32,23 +33,71 @@ class _HomePageState extends State<HomePage> {
 
   bool _showCartPanel = false;
 
+  // Video player controller
+  late VideoPlayerController _videoController;
+  bool _isVideoInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideoPlayer();
+  }
+
+  void _initializeVideoPlayer() async {
+    _videoController = VideoPlayerController.asset(
+      'assets/videos/background.mp4',
+    );
+    await _videoController.initialize();
+    _videoController.setLooping(true);
+    _videoController.setVolume(0.0); // Mute the video
+    _videoController.play();
+    setState(() {
+      _isVideoInitialized = true;
+    });
+  }
+
   @override
   void dispose() {
     _bannerController.dispose();
+    _videoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       appBar: _appBarFunction(),
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
+          // Video background
+          if (_isVideoInitialized)
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.2, // 80% transparency (20% opacity)
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: _videoController.value.size.width,
+                    height: _videoController.value.size.height,
+                    child: VideoPlayer(_videoController),
+                  ),
+                ),
+              ),
+            ),
+
+          // Fallback background color when video is not loaded
+          if (!_isVideoInitialized) Container(color: Colors.white),
+
+          // Main content
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(
+                  height: 100,
+                ), // Add space for transparent app bar
                 _searchField(context),
                 const SizedBox(height: 20),
                 _categorySection(),
@@ -113,7 +162,9 @@ class _HomePageState extends State<HomePage> {
   //homepage顶部的定位和个人主页进入按钮
   AppBar _appBarFunction() {
     return AppBar(
-      backgroundColor: Colors.orange[100],
+      backgroundColor: Colors.orange[100]?.withOpacity(
+        0.9,
+      ), // Semi-transparent app bar
       elevation: 0,
       centerTitle: false,
       title: Row(
@@ -174,7 +225,9 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(
+            0.95,
+          ), // Semi-transparent search field
           borderRadius: BorderRadius.circular(10),
           boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
         ),
@@ -205,7 +258,9 @@ class _HomePageState extends State<HomePage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.orange[100],
+                  color: Colors.orange[100]?.withOpacity(
+                    0.9,
+                  ), // Semi-transparent
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -236,7 +291,9 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: categories[index].boxColor.withOpacity(0.3),
+                    color: categories[index].boxColor.withOpacity(
+                      0.4,
+                    ), // Slightly more transparent
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -245,8 +302,10 @@ class _HomePageState extends State<HomePage> {
                       Container(
                         height: 70,
                         width: 80,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(
+                            0.95,
+                          ), // Semi-transparent
                           shape: BoxShape.circle,
                         ),
                         child: Padding(
@@ -406,7 +465,9 @@ Indulge in our cheesy pizza offer:
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.orange[100],
+                  color: Colors.orange[100]?.withOpacity(
+                    0.9,
+                  ), // Semi-transparent
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -442,7 +503,9 @@ Indulge in our cheesy pizza offer:
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.orange[100],
+                  color: Colors.orange[100]?.withOpacity(
+                    0.9,
+                  ), // Semi-transparent
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -476,7 +539,7 @@ Indulge in our cheesy pizza offer:
               child: Container(
                 height: 110,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.white.withOpacity(0.95), // Semi-transparent
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
