@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:assignment1/pages/homepage.dart';
-import 'package:assignment1/pages/order_page.dart'; // You'll need to create this
-import 'package:assignment1/pages/message_page.dart'; // You'll need to create this
+import 'package:assignment1/pages/order_page.dart';
+import 'package:assignment1/pages/message_page.dart'; 
+import 'package:assignment1/pages/splash_page.dart';
 import 'package:assignment1/models/cart_model.dart';
 
 void main() {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainNavigationWrapper(),
+      home:  SplashPage(),
     );
   }
 }
