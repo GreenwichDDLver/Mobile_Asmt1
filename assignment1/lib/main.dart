@@ -63,7 +63,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.orange[700],
         onTap: _onItemTapped,
       ),
     );

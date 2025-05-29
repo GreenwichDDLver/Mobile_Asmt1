@@ -71,8 +71,9 @@ class _OrderPageState extends State<OrderPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF9E5),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
+        backgroundColor: Colors.orange[100],
         title: const Text('My Orders'),
         bottom: TabBar(
           controller: _tabController,
@@ -109,7 +110,7 @@ class _OrderPageState extends State<OrderPage>
       itemBuilder: (context, index) {
         final order = _currentOrders[index];
         return Card(
-          color: const Color(0xFFFFF3C2),
+          color: const Color.fromARGB(255, 255, 249, 226),
           margin: const EdgeInsets.only(bottom: 16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -221,7 +222,7 @@ class _OrderPageState extends State<OrderPage>
       itemBuilder: (context, index) {
         final order = _orderHistory[index];
         return Card(
-          color: const Color(0xFFFFF3C2),
+          color: const Color.fromARGB(255, 255, 249, 226),
           margin: const EdgeInsets.only(bottom: 16),
           child: Padding(
             padding: const EdgeInsets.all(16),
