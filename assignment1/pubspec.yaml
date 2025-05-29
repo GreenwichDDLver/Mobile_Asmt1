@@ -91,6 +91,17 @@ flutter:
     - assets/images/usagi7.png
     - assets/images/hamberger.png
     - assets/images/chickencorns.jpg
+    - assets/images/friend1.jpg
+    - assets/images/friend2.jpg
+    - assets/images/friend3.jpg
+    - assets/images/friend4.jpg
+    - assets/images/rider1.jpg
+    - assets/images/rider2.jpg
+    - assets/images/rider3.jpg
+    - assets/images/mcdmerchant.jpg
+    - assets/images/mixuemerchant.jpg
+    - assets/images/noodlemerchant.jpg
+    - assets/images/UserImage.jpg
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

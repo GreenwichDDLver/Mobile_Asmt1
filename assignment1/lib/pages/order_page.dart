@@ -76,18 +76,12 @@ class _OrderPageState extends State<OrderPage>
         title: const Text('My Orders'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Current Orders'),
-            Tab(text: 'Order History'),
-          ],
+          tabs: const [Tab(text: 'Current Orders'), Tab(text: 'Order History')],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildCurrentOrders(),
-          _buildOrderHistory(),
-        ],
+        children: [_buildCurrentOrders(), _buildOrderHistory()],
       ),
     );
   }
@@ -98,18 +92,11 @@ class _OrderPageState extends State<OrderPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.receipt_long,
-              size: 80,
-              color: Colors.grey,
-            ),
+            Icon(Icons.receipt_long, size: 80, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               'No current orders',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
@@ -151,9 +138,7 @@ class _OrderPageState extends State<OrderPage>
                 const SizedBox(height: 8),
                 Text(
                   order['items'].join(', '),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -219,18 +204,11 @@ class _OrderPageState extends State<OrderPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.history,
-              size: 80,
-              color: Colors.grey,
-            ),
+            Icon(Icons.history, size: 80, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               'No order history',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
@@ -266,17 +244,19 @@ class _OrderPageState extends State<OrderPage>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: order['status'] == 'Completed'
-                            ? Colors.green[100]
-                            : Colors.red[100],
+                        color:
+                            order['status'] == 'Completed'
+                                ? Colors.green[100]
+                                : Colors.red[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         order['status'],
                         style: TextStyle(
-                          color: order['status'] == 'Completed'
-                              ? Colors.green[800]
-                              : Colors.red[800],
+                          color:
+                              order['status'] == 'Completed'
+                                  ? Colors.green[800]
+                                  : Colors.red[800],
                           fontSize: 12,
                         ),
                       ),
@@ -286,9 +266,7 @@ class _OrderPageState extends State<OrderPage>
                 const SizedBox(height: 8),
                 Text(
                   order['items'].join(', '),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -356,28 +334,29 @@ class _OrderPageState extends State<OrderPage>
   void _showOrderDetail(Map<String, dynamic> order) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Order Details - ${order['id']}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Shop: ${order['shopName']}'),
-            const SizedBox(height: 8),
-            Text('Items: ${order['items'].join(', ')}'),
-            const SizedBox(height: 8),
-            Text('Total: \$${order['totalPrice']}'),
-            const SizedBox(height: 8),
-            Text('Order Time: ${order['orderTime']}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Order Details - ${order['id']}'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Shop: ${order['shopName']}'),
+                const SizedBox(height: 8),
+                Text('Items: ${order['items'].join(', ')}'),
+                const SizedBox(height: 8),
+                Text('Total: \$${order['totalPrice']}'),
+                const SizedBox(height: 8),
+                Text('Order Time: ${order['orderTime']}'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 

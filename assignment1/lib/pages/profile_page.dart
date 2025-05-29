@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -8,27 +7,63 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin {
+class _ProfilePageState extends State<ProfilePage>
+    with TickerProviderStateMixin {
   String _userName = 'John Doe';
   String _userEmail = 'john.doe@email.com';
   String _deliveryAddress = '123 Main Street, Shanghai, China';
   double _walletBalance = 128.50;
-  
+
   // Coupon data
   final List<Map<String, dynamic>> _unusedCoupons = [
-    {'title': '20% Off First Order', 'discount': '20%', 'expiry': '2024-12-31', 'code': 'FIRST20'},
-    {'title': 'Free Delivery', 'discount': 'Free', 'expiry': '2024-11-30', 'code': 'FREEDEL'},
-    {'title': '\$10 Off \$50+', 'discount': '\$10', 'expiry': '2024-12-15', 'code': 'SAVE10'},
+    {
+      'title': '20% Off First Order',
+      'discount': '20%',
+      'expiry': '2024-12-31',
+      'code': 'FIRST20',
+    },
+    {
+      'title': 'Free Delivery',
+      'discount': 'Free',
+      'expiry': '2024-11-30',
+      'code': 'FREEDEL',
+    },
+    {
+      'title': '\$10 Off \$50+',
+      'discount': '\$10',
+      'expiry': '2024-12-15',
+      'code': 'SAVE10',
+    },
   ];
-  
+
   final List<Map<String, dynamic>> _usedCoupons = [
-    {'title': '15% Off Any Order', 'discount': '15%', 'usedDate': '2024-10-15', 'code': 'SAVE15'},
-    {'title': 'Buy 1 Get 1 Free', 'discount': 'BOGO', 'usedDate': '2024-10-10', 'code': 'BOGO1'},
+    {
+      'title': '15% Off Any Order',
+      'discount': '15%',
+      'usedDate': '2024-10-15',
+      'code': 'SAVE15',
+    },
+    {
+      'title': 'Buy 1 Get 1 Free',
+      'discount': 'BOGO',
+      'usedDate': '2024-10-10',
+      'code': 'BOGO1',
+    },
   ];
-  
+
   final List<Map<String, dynamic>> _expiredCoupons = [
-    {'title': '25% Off Weekend', 'discount': '25%', 'expiry': '2024-09-30', 'code': 'WEEK25'},
-    {'title': 'Student Discount', 'discount': '30%', 'expiry': '2024-08-31', 'code': 'STUDENT'},
+    {
+      'title': '25% Off Weekend',
+      'discount': '25%',
+      'expiry': '2024-09-30',
+      'code': 'WEEK25',
+    },
+    {
+      'title': 'Student Discount',
+      'discount': '30%',
+      'expiry': '2024-08-31',
+      'code': 'STUDENT',
+    },
   ];
 
   @override
@@ -63,37 +98,37 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
           children: [
             // Profile Header
             _buildProfileHeader(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Quick Stats
             _buildQuickStats(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Main Menu Options
             _buildMainMenuSection(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Wallet Section
             _buildWalletSection(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Coupons Section
             _buildCouponsSection(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Settings Section
             _buildSettingsSection(),
-            
+
             const SizedBox(height: 30),
-            
+
             // Logout Button
             _buildLogoutButton(),
-            
+
             const SizedBox(height: 40),
           ],
         ),
@@ -134,10 +169,40 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                     ),
                   ],
                 ),
-                child: Icon(
-                  Icons.person,
-                  size: 50,
-                  color: Colors.orange[800],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+
+                  child: Image.asset(
+                    'assets/images/UserImage.jpg',
+
+                    width: 100,
+
+                    height: 100,
+
+                    fit: BoxFit.cover,
+
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback to icon if image fails to load
+
+                      return Container(
+                        width: 100,
+
+                        height: 100,
+
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+
+                          color: Colors.orange[200],
+                        ),
+
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.orange[800],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
               Positioned(
@@ -175,10 +240,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
           const SizedBox(height: 5),
           Text(
             _userEmail,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 10),
           GestureDetector(
@@ -198,10 +260,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   Flexible(
                     child: Text(
                       _deliveryAddress,
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.grey[700], fontSize: 12),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -260,7 +319,11 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
           _buildStatItem(Icons.shopping_bag, '24', 'Orders'),
           _buildStatItem(Icons.favorite, '12', 'Favorites'),
           _buildStatItem(Icons.local_offer, '6', 'Coupons'),
-          _buildStatItem(Icons.account_balance_wallet, '\$${_walletBalance.toStringAsFixed(2)}', 'Wallet'),
+          _buildStatItem(
+            Icons.account_balance_wallet,
+            '\$${_walletBalance.toStringAsFixed(2)}',
+            'Wallet',
+          ),
         ],
       ),
     );
@@ -287,13 +350,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
             color: Colors.black,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],
     );
   }
@@ -402,19 +459,24 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                       ),
                       Text(
                         'Balance: \$${_walletBalance.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
                 ),
                 Row(
                   children: [
-                    _buildWalletButton('Top Up', Colors.green, () => _showTopUpDialog()),
+                    _buildWalletButton(
+                      'Top Up',
+                      Colors.green,
+                      () => _showTopUpDialog(),
+                    ),
                     const SizedBox(width: 10),
-                    _buildWalletButton('Manage', Colors.orange, () => _showManagePaymentDialog()),
+                    _buildWalletButton(
+                      'Manage',
+                      Colors.orange,
+                      () => _showManagePaymentDialog(),
+                    ),
                   ],
                 ),
               ],
@@ -569,11 +631,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
           color: Colors.orange[50],
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: Colors.orange[700],
-          size: 24,
-        ),
+        child: Icon(icon, color: Colors.orange[700], size: 24),
       ),
       title: Text(
         title,
@@ -585,16 +643,11 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-        ),
+        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
       ),
-      trailing: trailing ?? Icon(
-        Icons.arrow_forward_ios,
-        size: 16,
-        color: Colors.grey[400],
-      ),
+      trailing:
+          trailing ??
+          Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
     );
@@ -646,103 +699,120 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
   // Dialog Functions
   void _showEditProfileDialog() {
-    TextEditingController nameController = TextEditingController(text: _userName);
-    TextEditingController emailController = TextEditingController(text: _userEmail);
+    TextEditingController nameController = TextEditingController(
+      text: _userName,
+    );
+    TextEditingController emailController = TextEditingController(
+      text: _userEmail,
+    );
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
+            title: const Text('Edit Profile'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _userName = nameController.text;
+                    _userEmail = emailController.text;
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _userName = nameController.text;
-                _userEmail = emailController.text;
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showChangeAvatarDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Change Avatar'),
-        content: const Text('Avatar change functionality will be implemented here.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: const Text('Change Avatar'),
+            content: const Text(
+              'Avatar change functionality will be implemented here.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showEditAddressDialog() {
-    TextEditingController addressController = TextEditingController(text: _deliveryAddress);
+    TextEditingController addressController = TextEditingController(
+      text: _deliveryAddress,
+    );
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Edit Delivery Address'),
-        content: TextField(
-          controller: addressController,
-          decoration: const InputDecoration(
-            labelText: 'Address',
-            border: OutlineInputBorder(),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: const Text('Edit Delivery Address'),
+            content: TextField(
+              controller: addressController,
+              decoration: const InputDecoration(
+                labelText: 'Address',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _deliveryAddress = addressController.text;
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
+            ],
           ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _deliveryAddress = addressController.text;
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -751,113 +821,126 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Top Up Wallet'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Current Balance: \$${_walletBalance.toStringAsFixed(2)}'),
-            const SizedBox(height: 15),
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Amount',
-                prefixText: '\$',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              double amount = double.tryParse(amountController.text) ?? 0;
-              if (amount > 0) {
-                setState(() {
-                  _walletBalance += amount;
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added \$${amount.toStringAsFixed(2)} to wallet'),
-                    backgroundColor: Colors.green,
+            title: const Text('Top Up Wallet'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Current Balance: \$${_walletBalance.toStringAsFixed(2)}'),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                    prefixText: '\$',
+                    border: OutlineInputBorder(),
                   ),
-                );
-              }
-            },
-            child: const Text('Top Up'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  double amount = double.tryParse(amountController.text) ?? 0;
+                  if (amount > 0) {
+                    setState(() {
+                      _walletBalance += amount;
+                    });
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Added \$${amount.toStringAsFixed(2)} to wallet',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Top Up'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showManagePaymentDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Manage Payment Methods'),
-        content: const Text('Payment method management will be implemented here.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            title: const Text('Manage Payment Methods'),
+            content: const Text(
+              'Payment method management will be implemented here.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showCouponsDialog() {
     showDialog(
       context: context,
-      builder: (context) => DefaultTabController(
-        length: 3,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: const Text('My Coupons'),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 400,
-            child: Column(
-              children: [
-                TabBar(
-                  labelColor: Colors.orange[700],
-                  unselectedLabelColor: Colors.grey,
-                  indicatorColor: Colors.orange[700],
-                  tabs: const [
-                    Tab(text: 'Unused'),
-                    Tab(text: 'Used'),
-                    Tab(text: 'Expired'),
+      builder:
+          (context) => DefaultTabController(
+            length: 3,
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              title: const Text('My Coupons'),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    TabBar(
+                      labelColor: Colors.orange[700],
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.orange[700],
+                      tabs: const [
+                        Tab(text: 'Unused'),
+                        Tab(text: 'Used'),
+                        Tab(text: 'Expired'),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          _buildCouponList(_unusedCoupons, 'unused'),
+                          _buildCouponList(_usedCoupons, 'used'),
+                          _buildCouponList(_expiredCoupons, 'expired'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _buildCouponList(_unusedCoupons, 'unused'),
-                      _buildCouponList(_usedCoupons, 'used'),
-                      _buildCouponList(_expiredCoupons, 'expired'),
-                    ],
-                  ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -870,12 +953,20 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
           margin: const EdgeInsets.symmetric(vertical: 5),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: type == 'unused' ? Colors.green[50] : 
-                   type == 'used' ? Colors.blue[50] : Colors.red[50],
+            color:
+                type == 'unused'
+                    ? Colors.green[50]
+                    : type == 'used'
+                    ? Colors.blue[50]
+                    : Colors.red[50],
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: type == 'unused' ? Colors.green[200]! : 
-                     type == 'used' ? Colors.blue[200]! : Colors.red[200]!,
+              color:
+                  type == 'unused'
+                      ? Colors.green[200]!
+                      : type == 'used'
+                      ? Colors.blue[200]!
+                      : Colors.red[200]!,
             ),
           ),
           child: Column(
@@ -910,9 +1001,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
           ),
           title: const Text(
             'Logout',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: const Text('Are you sure you want to logout?'),
           actions: [
@@ -920,12 +1009,7 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
-              ),
+              child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
             ),
             ElevatedButton(
               onPressed: () {
