@@ -104,7 +104,6 @@ flutter:
     - assets/images/mixuemerchant.jpg
     - assets/images/noodlemerchant.jpg
     - assets/images/UserImage.jpg
-    - assets/images/background.jpg
     - assets/videos/background.mp4
     
   # An image asset can refer to one or more resolution-specific "variants", see
