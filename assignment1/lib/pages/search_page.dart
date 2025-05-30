@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'menu_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -10,14 +11,14 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   List<String> _searchHistory = [];
-  List<String> _hotSearches = ['Popular Item 1', 'Popular Item 2', 'Popular Item 3'];
+  List<String> _hotSearches = ['Suanyu House', 'Food by K', 'Hangzhou Flavor'];
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    _searchHistory = ['History 1', 'History 2', 'History 3'];
+    _searchHistory = ['mcdonald'];
   }
 
   void _performSearch(String query) {
@@ -25,38 +26,44 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() {
       _isSearching = true;
-      if (!_searchHistory.contains(query)) {
-        _searchHistory.insert(0, query);
-        if (_searchHistory.length > 10) {
-          _searchHistory.removeLast();
-        }
-      }
-    });
-
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
+      if (query == 'Hangzhou Flavor') {
         _searchResults = [
           {
-            'name': 'Result Item 1',
-            'image': 'assets/images/food1.jpg',
-            'price': 25.0,
+            'name': 'Hangzhou Flavor',
+            'image': 'assets/images/shop.jpg',
             'rating': 4.5,
           },
           {
-            'name': 'Result Item 2',
-            'image': 'assets/images/food2.jpg',
-            'price': 30.0,
+            'name': 'Result Restaurant 2',
+            'image': Icons.fastfood,  // 使用通用食物图标
             'rating': 4.2,
           },
           {
-            'name': 'Result Item 3',
-            'image': 'assets/images/food3.jpg',
-            'price': 18.0,
+            'name': 'Result Restaurant 3',
+            'image': Icons.fastfood,  // 使用通用食物图标
             'rating': 4.8,
           },
         ];
-        _isSearching = false;
-      });
+      } else {
+        _searchResults = [
+          {
+            'name': 'Result Restaurant 1',
+            'image': 'assets/images/shop.jpg',
+            'rating': 4.5,
+          },
+          {
+            'name': 'Result Restaurant 2',
+            'image': Icons.fastfood,  // 使用通用食物图标
+            'rating': 4.2,
+          },
+          {
+            'name': 'Result Restaurant 3',
+            'image': Icons.fastfood,  // 使用通用食物图标
+            'rating': 4.8,
+          },
+        ];
+      }
+      _isSearching = false;
     });
   }
 
@@ -223,33 +230,20 @@ class _SearchPageState extends State<SearchPage> {
           color: Colors.orange[50],
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            leading: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.orange[100],
-              ),
-              child: const Icon(Icons.fastfood),
-            ),
+            leading: item['image'] is String
+                ? Image.asset(item['image'], fit: BoxFit.cover)  // 对于图片路径
+                : Icon(item['image'], size: 40),  // 调整图标大小
             title: Text(item['name']),
             subtitle: Row(
               children: [
                 const Icon(Icons.star, color: Colors.orange, size: 16),
                 Text(' ${item['rating']}'),
-                const Spacer(),
-                Text(
-                  '\$${item['price']}',
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               ],
             ),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Clicked on ${item['name']}')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MenuPage()), 
               );
             },
           ),

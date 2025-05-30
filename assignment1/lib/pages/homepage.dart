@@ -5,7 +5,7 @@ import 'package:assignment1/models/category.dart';
 import 'package:assignment1/models/RestaurantList.dart';
 import 'package:assignment1/pages/menu_page.dart';
 import 'package:assignment1/pages/search_page.dart';
-import 'package:assignment1/pages/profile_page.dart';
+import 'package:assignment1/pages/personal_page.dart';
 import 'package:assignment1/widgets/cart_panel.dart';
 import 'package:assignment1/widgets/homepage_banner.dart';
 
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ProfilePage()),
+                MaterialPageRoute(builder: (context) => const PersonalHomePage()),
               );
             },
             child: Container(
