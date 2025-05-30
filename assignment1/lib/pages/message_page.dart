@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:assignment1/pages/contact_page.dart';
 
 class MessagePage extends StatefulWidget {
   const MessagePage({Key? key}) : super(key: key);
@@ -26,9 +27,9 @@ class _MessagePageState extends State<MessagePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Added missing comma
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.orange[100], // Added missing comma
+        backgroundColor: Colors.orange[100],
         elevation: 0,
         title: const Text(
           'Message',
@@ -88,11 +89,11 @@ class _MessagePageState extends State<MessagePage>
               radius: 25,
               backgroundColor: Colors.yellow[200],
               backgroundImage:
-                  message.avatarPath != null
+                  message.avatarPath != null && message.avatarPath!.isNotEmpty
                       ? AssetImage(message.avatarPath!)
                       : null,
               child:
-                  message.avatarPath == null
+                  message.avatarPath == null || message.avatarPath!.isEmpty
                       ? Icon(Icons.person, color: Colors.brown[600], size: 30)
                       : null,
             ),
@@ -118,8 +119,17 @@ class _MessagePageState extends State<MessagePage>
               style: TextStyle(fontSize: 12, color: Colors.grey[500]),
             ),
             onTap: () {
-              // Handle message tap
-              print('Tapped on ${message.name}');
+              // 点击跳转到 ContactPage，传递名字和头像路径
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => ContactPage(
+                        contactName: message.name,
+                        contactAvatar: message.avatarPath ?? '',
+                      ),
+                ),
+              );
             },
           ),
         );

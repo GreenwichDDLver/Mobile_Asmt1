@@ -37,6 +37,9 @@ class _HomePageState extends State<HomePage> {
   late VideoPlayerController _videoController;
   bool _isVideoInitialized = false;
 
+  // 当前选中的城市
+  String _selectedCity = "KuaLumpur";
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +52,7 @@ class _HomePageState extends State<HomePage> {
     );
     await _videoController.initialize();
     _videoController.setLooping(true);
-    _videoController.setVolume(0.0); // Mute the video
+    _videoController.setVolume(0.0); // 静音
     _videoController.play();
     setState(() {
       _isVideoInitialized = true;
@@ -71,11 +74,11 @@ class _HomePageState extends State<HomePage> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Video background
+          // 视频背景
           if (_isVideoInitialized)
             Positioned.fill(
               child: Opacity(
-                opacity: 0.2, // 80% transparency (20% opacity)
+                opacity: 0.2,
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
@@ -87,17 +90,15 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-          // Fallback background color when video is not loaded
+          // 视频未加载时的背景颜色
           if (!_isVideoInitialized) Container(color: Colors.white),
 
-          // Main content
+          // 主要内容
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  height: 100,
-                ), // Add space for transparent app bar
+                const SizedBox(height: 100), // 给透明appbar留空隙
                 _searchField(context),
                 const SizedBox(height: 20),
                 _categorySection(),
@@ -145,7 +146,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // 这里替换成调用 CartPanel 组件
+          // 购物车面板
           if (_showCartPanel)
             CartPanel(
               onClose: () {
@@ -159,26 +160,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //homepage顶部的定位和个人主页进入按钮
+  // 修改后的appbar，地点可点击选择城市
   AppBar _appBarFunction() {
     return AppBar(
-      backgroundColor: Colors.orange[100]?.withOpacity(
-        0.9,
-      ), // Semi-transparent app bar
+      backgroundColor: Colors.orange[100]?.withOpacity(0.9),
       elevation: 0,
       centerTitle: false,
-      title: Row(
-        children: [
-          const Icon(Icons.location_on, color: Colors.black, size: 20),
-          const SizedBox(width: 5),
-          Expanded(
-            child: Text(
-              "KuaLumpur", // 定位
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.black, fontSize: 14),
+      title: GestureDetector(
+        onTap: _showCitySelectionDialog,
+        child: Row(
+          children: [
+            const Icon(Icons.location_on, color: Colors.black, size: 20),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Text(
+                _selectedCity,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.black, fontSize: 14),
+              ),
             ),
-          ),
-        ],
+            const Icon(Icons.arrow_drop_down, color: Colors.black),
+          ],
+        ),
       ),
       actions: [
         Padding(
@@ -187,7 +190,9 @@ class _HomePageState extends State<HomePage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PersonalHomePage()),
+                MaterialPageRoute(
+                  builder: (context) => const PersonalHomePage(),
+                ),
               );
             },
             child: Container(
@@ -212,7 +217,42 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //搜索页面进入
+  // 弹出城市选择对话框
+  void _showCitySelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final cities = [
+          "KuaLumpur",
+          "Penang",
+          "Johor Bahru",
+          "Ipoh",
+          "Melaka",
+          "Kota Kinabalu",
+          "Kuching",
+          "George Town",
+        ];
+
+        return SimpleDialog(
+          title: const Text("Select a city"),
+          children:
+              cities.map((city) {
+                return SimpleDialogOption(
+                  onPressed: () {
+                    setState(() {
+                      _selectedCity = city;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Text(city),
+                );
+              }).toList(),
+        );
+      },
+    );
+  }
+
+  // 搜索栏
   GestureDetector _searchField(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -225,9 +265,7 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(
-            0.95,
-          ), // Semi-transparent search field
+          color: Colors.white.withOpacity(0.95),
           borderRadius: BorderRadius.circular(10),
           boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
         ),
@@ -242,7 +280,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //分类表
+  // 分类区
   Column _categorySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,9 +296,7 @@ class _HomePageState extends State<HomePage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.orange[100]?.withOpacity(
-                    0.9,
-                  ), // Semi-transparent
+                  color: Colors.orange[100]?.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -276,7 +312,6 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-
         const SizedBox(height: 0),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -291,9 +326,7 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: categories[index].boxColor.withOpacity(
-                      0.4,
-                    ), // Slightly more transparent
+                    color: categories[index].boxColor.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -303,9 +336,7 @@ class _HomePageState extends State<HomePage> {
                         height: 70,
                         width: 80,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(
-                            0.95,
-                          ), // Semi-transparent
+                          color: Colors.white.withOpacity(0.95),
                           shape: BoxShape.circle,
                         ),
                         child: Padding(
@@ -336,7 +367,43 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //banner
+  // 最近活动标题
+  Column _recentActivitiesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100]?.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  "Recent Activities",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Image.asset("assets/images/usagi2.png", width: 135, height: 85),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // banner区
   Widget _bannerSection() {
     final bannerDescriptions = [
       '''
@@ -449,45 +516,7 @@ Indulge in our cheesy pizza offer:
     );
   }
 
-  //banner的标题
-  Column _recentActivitiesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100]?.withOpacity(
-                    0.9,
-                  ), // Semi-transparent
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  "Recent Activities",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Image.asset("assets/images/usagi2.png", width: 135, height: 85),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  //商家列表
+  // 推荐商家列表
   Column _RestaurantListSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,9 +532,7 @@ Indulge in our cheesy pizza offer:
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.orange[100]?.withOpacity(
-                    0.9,
-                  ), // Semi-transparent
+                  color: Colors.orange[100]?.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -521,7 +548,6 @@ Indulge in our cheesy pizza offer:
             ],
           ),
         ),
-
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -539,7 +565,7 @@ Indulge in our cheesy pizza offer:
               child: Container(
                 height: 110,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95), // Semi-transparent
+                  color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -550,10 +576,8 @@ Indulge in our cheesy pizza offer:
                     ),
                   ],
                 ),
-
                 child: Row(
                   children: [
-                    // 左侧图片：加 Padding 实现左边距
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: ClipRRect(

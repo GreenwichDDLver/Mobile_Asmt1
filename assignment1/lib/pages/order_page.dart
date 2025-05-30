@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:assignment1/pages/contact_page.dart';
+import 'package:assignment1/pages/checkout_page.dart';
 import 'dart:async';
 import 'dart:ui';
 
@@ -117,13 +119,11 @@ class _OrderPageState extends State<OrderPage>
 
   void _startLocationUpdates() {
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      // Simulate rider movement (in real app, get from backend)
       setState(() {
         for (String orderId in _riderLocations.keys) {
           _riderLocations[orderId]!['lat'] += 0.001;
           _riderLocations[orderId]!['lng'] += 0.001;
 
-          // Update time left
           Duration currentTime = _riderLocations[orderId]!['timeLeft'];
           if (currentTime.inMinutes > 0) {
             _riderLocations[orderId]!['timeLeft'] = Duration(
@@ -135,7 +135,6 @@ class _OrderPageState extends State<OrderPage>
     });
   }
 
-  // Get current out for delivery orders
   List<Map<String, dynamic>> get _outForDeliveryOrders {
     return _currentOrders
         .where((order) => order['status'] == 'Out for Delivery')
@@ -165,14 +164,11 @@ class _OrderPageState extends State<OrderPage>
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Map Section at the top
           if (_outForDeliveryOrders.isNotEmpty)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: _buildDeliveryMap(),
             ),
-
-          // Orders List
           _buildCurrentOrders(),
         ],
       ),
@@ -277,29 +273,76 @@ class _OrderPageState extends State<OrderPage>
                   ],
                 ),
                 const SizedBox(height: 12),
+
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFFF8C00),
-                        side: const BorderSide(color: Color(0xFFFF8C00)),
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.phone, color: Colors.green),
                       onPressed: () {
-                        _showOrderDetail(order);
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: const Text(
+                                  'Do you want to call the rider?',
+                                ),
+                                content: const Text(
+                                  'Do you want to call the rider?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // 关闭对话框
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // 关闭对话框
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'You are calling the rider...',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Call'),
+                                  ),
+                                ],
+                              ),
+                        );
                       },
-                      child: const Text('View Details'),
+                      tooltip: 'Call Rider',
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFA500),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        _contactDelivery(order);
-                      },
-                      child: const Text('Contact Rider'),
+
+                    Row(
+                      children: [
+                        OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFFFF8C00),
+                            side: const BorderSide(color: Color(0xFFFF8C00)),
+                          ),
+                          onPressed: () {
+                            _showOrderDetail(order);
+                          },
+                          child: const Text('View Details'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFA500),
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            _showContactOptions(order);
+                          },
+                          child: const Text('Contact'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -324,13 +367,11 @@ class _OrderPageState extends State<OrderPage>
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            // Background image as map background
             Positioned.fill(
               child: Image.asset(
                 'assets/images/map.png',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  // fallback to grey background + grid if image not found
                   return Container(
                     color: Colors.grey.shade200,
                     child: CustomPaint(
@@ -341,14 +382,8 @@ class _OrderPageState extends State<OrderPage>
                 },
               ),
             ),
-
-            // Map Markers for all out for delivery orders
             _buildAllMapMarkers(),
-
-            // Delivery Routes for all orders
             ..._buildAllRoutes(),
-
-            // Active Riders Info Overlay
             Positioned(
               top: 8,
               left: 8,
@@ -400,8 +435,6 @@ class _OrderPageState extends State<OrderPage>
                 ),
               ),
             ),
-
-            // Legend
             Positioned(
               bottom: 8,
               left: 8,
@@ -423,8 +456,6 @@ class _OrderPageState extends State<OrderPage>
                 ),
               ),
             ),
-
-            // Tracking info
             Positioned(
               bottom: 8,
               right: 8,
@@ -449,12 +480,10 @@ class _OrderPageState extends State<OrderPage>
   Widget _buildAllMapMarkers() {
     return Stack(
       children: [
-        // Shop markers for out for delivery orders
         ..._outForDeliveryOrders.asMap().entries.map((entry) {
           int index = entry.key;
           Map<String, dynamic> order = entry.value;
 
-          //Position shops at different locations
           double leftPosition = 200.0 + (index * 220.0);
           double topPosition = 200.0 - (index * 60.0);
 
@@ -487,14 +516,11 @@ class _OrderPageState extends State<OrderPage>
             ),
           );
         }).toList(),
-
-        // Rider markers with time left labels for out for delivery orders (background color removed)
         ..._outForDeliveryOrders.asMap().entries.map((entry) {
           int index = entry.key;
           Map<String, dynamic> order = entry.value;
           final riderInfo = _riderLocations[order['id']]!;
 
-          //Position riders between shops and destination
           double leftPosition = 160.0 + (index * 100.0);
           double topPosition = 80.0 - (index * 60.0);
 
@@ -506,13 +532,12 @@ class _OrderPageState extends State<OrderPage>
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: BoxDecoration(shape: BoxShape.circle),
+                  decoration: const BoxDecoration(shape: BoxShape.circle),
                   child: ClipOval(
                     child: Image.asset(
                       riderInfo['riderImage'],
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        // No colored background, just icon
                         return Center(
                           child: Icon(
                             Icons.motorcycle,
@@ -547,8 +572,6 @@ class _OrderPageState extends State<OrderPage>
             ),
           );
         }).toList(),
-
-        // User location marker moved more left (from 260 to 120)
         Positioned(
           left: 110,
           top: 40,
@@ -585,7 +608,6 @@ class _OrderPageState extends State<OrderPage>
     return _outForDeliveryOrders.asMap().entries.map((entry) {
       int index = entry.key;
 
-      // Adjusted route points to match updated positions
       Offset startPoint = Offset(
         198.0 + (index * 220.0),
         198.0 - (index * 60.0),
@@ -598,7 +620,6 @@ class _OrderPageState extends State<OrderPage>
 
       return Stack(
         children: [
-          // Route from shop to rider
           CustomPaint(
             painter: RoutePainter(
               start: startPoint,
@@ -607,7 +628,6 @@ class _OrderPageState extends State<OrderPage>
             ),
             size: Size.infinite,
           ),
-          // Route from rider to destination
           CustomPaint(
             painter: RoutePainter(
               start: riderPoint,
@@ -820,6 +840,55 @@ class _OrderPageState extends State<OrderPage>
     );
   }
 
+  void _showContactOptions(Map<String, dynamic> order) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Contact Options'),
+            content: const Text('Who do you want to contact?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToContactPage(order, contactType: 'rider');
+                },
+                child: const Text('Contact Rider'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToContactPage(order, contactType: 'merchant');
+                },
+                child: const Text('Contact Merchant'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _navigateToContactPage(
+    Map<String, dynamic> order, {
+    required String contactType,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ContactPage(
+              contactName:
+                  contactType == 'rider'
+                      ? _riderLocations[order['id']]!['riderName']
+                      : order['shopName'],
+              contactAvatar:
+                  contactType == 'rider'
+                      ? 'assets/images/riderotw.png'
+                      : order['shopImage'] ?? 'assets/images/mcdmerchant.jpg',
+            ),
+      ),
+    );
+  }
+
   void _contactDelivery(Map<String, dynamic> order) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Contacting rider for order ${order['id']}')),
@@ -833,8 +902,9 @@ class _OrderPageState extends State<OrderPage>
   }
 
   void _reorderFood(Map<String, dynamic> order) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Reordering from ${order['shopName']}')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CheckoutPage()),
     );
   }
 
@@ -855,7 +925,6 @@ class MapPainter extends CustomPainter {
           ..color = Colors.grey.withOpacity(0.1)
           ..strokeWidth = 1;
 
-    // Draw grid lines to simulate map
     for (int i = 0; i < size.width; i += 30) {
       canvas.drawLine(
         Offset(i.toDouble(), 0),
@@ -872,7 +941,6 @@ class MapPainter extends CustomPainter {
       );
     }
 
-    // Draw some "streets"
     final streetPaint =
         Paint()
           ..color = Colors.grey.withOpacity(0.3)
@@ -929,7 +997,6 @@ class RoutePainter extends CustomPainter {
     final path = Path();
     path.moveTo(start.dx, start.dy);
 
-    // Create a curved path
     final controlPoint1 = Offset(
       start.dx + (end.dx - start.dx) * 0.3,
       start.dy,
@@ -944,7 +1011,7 @@ class RoutePainter extends CustomPainter {
       end.dx,
       end.dy,
     );
-    // Create dashed effect
+
     const dashWidth = 5.0;
     const dashSpace = 5.0;
     double distance = 0.0;
