@@ -152,10 +152,42 @@ class _OrderPageState extends State<OrderPage>
           controller: _tabController,
           tabs: const [Tab(text: 'Current Orders'), Tab(text: 'Order History')],
         ),
+        flexibleSpace: Container(
+          padding: const EdgeInsets.only(
+            top: 40,
+            left: 16,
+            right: 16,
+          ), // 顶部留出状态栏高度，左右间距
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _buildPatternImage('assets/images/pattern1.png', small: true),
+              _buildPatternImage('assets/images/pattern2.png', small: false),
+              _buildPatternImage('assets/images/pattern3.png', small: true),
+              _buildPatternImage('assets/images/pattern4.png', small: false),
+            ],
+          ),
+        ),
       ),
+
       body: TabBarView(
         controller: _tabController,
         children: [_buildCurrentOrdersWithMap(), _buildOrderHistory()],
+      ),
+    );
+  }
+
+  Widget _buildPatternImage(String assetPath, {required bool small}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      child: Opacity(
+        opacity: 0.50,
+        child: Image.asset(
+          assetPath,
+          fit: BoxFit.contain,
+          height: small ? 50 : 80,
+        ),
       ),
     );
   }
