@@ -22,21 +22,21 @@ class _OrderPageState extends State<OrderPage>
       'lat': 37.7749,
       'lng': -122.4194,
       'riderName': 'John Doe',
-      'riderImage': 'assets/images/riderotw.png',
+      'riderImage': 'assets/images/riderotw.png', //riderotw.jpg图片没有放，记得改
       'timeLeft': Duration(minutes: 25),
     },
     'ORD002': {
       'lat': 37.7849,
       'lng': -122.4094,
       'riderName': 'Jane Smith',
-      'riderImage': 'assets/images/riderotw.png',
+      'riderImage': 'assets/images/riderotw.png', //riderotw.jpg图片没有放，记得改
       'timeLeft': Duration(minutes: 15),
     },
     'ORD003': {
       'lat': 37.7649,
       'lng': -122.4294,
       'riderName': 'Mike Johnson',
-      'riderImage': 'assets/images/riderotw.png',
+      'riderImage': 'assets/images/riderotw.png', //riderotw.jpg图片没有放，记得改
       'timeLeft': Duration(minutes: 12),
     },
   };
@@ -900,26 +900,38 @@ class _OrderPageState extends State<OrderPage>
   }
 
   void _navigateToContactPage(
-    Map<String, dynamic> order, {
-    required String contactType,
-  }) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ContactPage(
-              contactName:
-                  contactType == 'rider'
-                      ? _riderLocations[order['id']]!['riderName']
-                      : order['shopName'],
-              contactAvatar:
-                  contactType == 'rider'
-                      ? 'assets/images/riderotw.png'
-                      : order['shopImage'] ?? 'assets/images/mcdmerchant.jpg',
-            ),
-      ),
-    );
+  Map<String, dynamic> order, {
+  required String contactType,
+}) {
+  String contactName;
+  String contactAvatar;
+  
+  if (contactType == 'rider') {
+    // Check if rider information exists for this order
+    final riderInfo = _riderLocations[order['id']];
+    if (riderInfo != null) {
+      contactName = riderInfo['riderName'] ?? 'Unknown Rider';
+      contactAvatar = 'assets/images/rider1.jpg';
+    } else {
+      // Fallback if no rider info is available
+      contactName = 'Delivery Rider';
+      contactAvatar = 'assets/images/rider1.jpg';
+    }
+  } else {
+    contactName = order['shopName'] ?? 'Unknown Shop';
+    contactAvatar = order['shopImage'] ?? 'assets/images/mcdmerchant.jpg';
   }
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ContactPage(
+        contactName: contactName,
+        contactAvatar: contactAvatar,
+      ),
+    ),
+  );
+}
 
   void _contactDelivery(Map<String, dynamic> order) {
     ScaffoldMessenger.of(context).showSnackBar(
