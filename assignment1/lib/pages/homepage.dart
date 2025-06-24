@@ -1,3 +1,4 @@
+import 'package:assignment1/widgets/nav_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
@@ -72,6 +73,9 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.transparent,
       appBar: _appBarFunction(),
       extendBodyBehindAppBar: true,
+
+      drawer: const NavDrawer(),
+
       body: Stack(
         children: [
           // 视频背景
@@ -183,6 +187,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      /*
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 15),
@@ -214,6 +219,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
+      */
     );
   }
 

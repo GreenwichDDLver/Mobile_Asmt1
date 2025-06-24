@@ -668,26 +668,6 @@ class _PersonalHomePageState extends State<PersonalHomePage> with TickerProvider
             () {},
           ),
           _buildDivider(),
-          _buildValueItem(
-            'Settings',
-            null,
-            Icons.arrow_forward_ios,
-            () => _showSettingsDialog(),
-          ),
-          _buildDivider(),
-          _buildValueItem(
-            'Help Center',
-            null,
-            Icons.arrow_forward_ios,
-            () {},
-          ),
-          _buildDivider(),
-          _buildValueItem(
-            'Language',
-            'English',
-            Icons.arrow_forward_ios,
-            () {},
-          ),
         ],
       ),
     );
