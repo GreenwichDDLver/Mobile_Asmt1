@@ -114,6 +114,8 @@ flutter:
     - assets/images/pattern4.png
     - assets/images/riderotw.jpg
     - assets/images/personBackground.jpg
+    - assets/images/placeholder.png
+    - assets/data/restaurants_menu_data.json
   #riderotw.jpg图片没有放，记得改
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

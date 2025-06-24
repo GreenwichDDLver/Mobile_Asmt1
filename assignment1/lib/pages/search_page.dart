@@ -241,11 +241,14 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MenuPage()), 
-              );
-            },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MenuPage(restaurantName: item['name']),
+                  ),
+                );
+              },
+
           ),
         );
       },

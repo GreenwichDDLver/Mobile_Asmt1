@@ -1,66 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../models/RestaurantList.dart';
 
 class BannerHeader extends StatelessWidget {
-  const BannerHeader({super.key});
+  final RestaurantListModel restaurant;
+  final String sales;
+
+  const BannerHeader({super.key, required this.restaurant, required this.sales});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.orange[50],
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset('assets/images/shop.jpg', width: 110, height: 110),
+            child: Image.asset(
+              restaurant.iconPath,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Hangzhou flavor',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  restaurant.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                // 评分和配送时间一行
                 Row(
                   children: [
-                    const Icon(Icons.star, size: 16, color: Color.fromARGB(255, 255, 187, 0)),
+                    Icon(Icons.star, color: Colors.orangeAccent, size: 16),
                     const SizedBox(width: 4),
-                    const Text(
-                      '4.4',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    Text(
+                      '${restaurant.score}',
+                      style: const TextStyle(fontSize: 14),
                     ),
-                    const SizedBox(width: 20),
-                    const Text(
-                      '40min | ',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    SvgPicture.asset(
-                      "assets/icons/delivery.svg",
-                      width: 14,
-                      height: 14,
-                      color: Colors.grey,
-                    ),
+                    const SizedBox(width: 12),
+                    Icon(Icons.timer, color: Colors.grey, size: 16),
                     const SizedBox(width: 4),
-                    const Text(
-                      '\$1.0',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    Text(
+                      restaurant.duration,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(Icons.monetization_on, color: Colors.green, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      restaurant.fee,
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                // 月销单独一行
-                const Text(
-                  'Monthly sales 2000+',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                const SizedBox(height: 6),
+                Text(
+                  sales,
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.star_border),
         ],
       ),
     );

@@ -1,89 +1,130 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/cart_model.dart';
 
 class BottomCart extends StatelessWidget {
-  final VoidCallback? onCheckoutPressed;
+  final VoidCallback onCheckoutPressed;
 
-  const BottomCart({super.key, this.onCheckoutPressed});
+  const BottomCart({super.key, required this.onCheckoutPressed});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // 购物车图标和数量
-          Container(
-            padding: const EdgeInsets.all(12),
+    return Consumer<CartModel>(
+      builder: (context, cart, child) {
+        // 如果购物车为空，显示空状态
+        if (cart.isEmpty) {
+          return Container(
+            height: 70,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.orangeAccent,
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.grey[100],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  offset: const Offset(0, -1),
+                  blurRadius: 4,
+                )
+              ],
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.shopping_cart, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  '2',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+            child: const Row(
+              children: [
+                Icon(Icons.shopping_cart_outlined, 
+                     size: 28, 
+                     color: Colors.grey),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Your cart is empty',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ],
             ),
+          );
+        }
+
+        // 购物车有商品时的显示
+        return Container(
+          height: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.orange[100],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                offset: const Offset(0, -1),
+                blurRadius: 4,
+              )
+            ],
           ),
-
-          const SizedBox(width: 16),
-
-          // 价格信息
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Total: \$25.00',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          child: Row(
+            children: [
+              const Icon(Icons.shopping_cart_outlined, 
+                         size: 28, 
+                         color: Colors.orange),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${cart.totalItems} item${cart.totalItems == 1 ? '' : 's'}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      'Total: \$${cart.totalPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Including delivery fee',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              // 显示当前餐厅名称（可选）
+              if (cart.currentRestaurant != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    cart.currentRestaurant!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-          ),
-
-          // Check按钮
-          ElevatedButton(
-            onPressed: onCheckoutPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orangeAccent,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+              ElevatedButton(
+                onPressed: cart.totalItems > 0 ? onCheckoutPressed : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: cart.totalItems > 0 
+                      ? Colors.orangeAccent 
+                      : Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: const Text(
+                  'Checkout',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ),
-            child: const Text(
-              'Check',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

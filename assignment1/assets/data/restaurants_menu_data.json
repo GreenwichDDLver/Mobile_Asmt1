@@ -1,0 +1,157 @@
+[
+  {
+    "name": "Hang Zhou Flavor",
+    "iconPath": "assets/images/logo4.jpg",
+    "score": "4.4",
+    "duration": "40mins",
+    "fee": "$1.00",
+    "sales": "Monthly sales 2000+",
+    "menuItems": [
+      {
+        "name": "Steam Dumpling",
+        "description": "Monthly sales 1000+ The Best Seller",
+        "price": 12,
+        "category": "Best Sales",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Dumpling",
+        "description": "Monthly sales 300+ Public Recommend",
+        "price": 13,
+        "category": "Dumpling",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Steam Bread",
+        "description": "Monthly sales 200+ Recommend",
+        "price": 13,
+        "category": "Rice",
+        "imagePath": "assets/images/placeholder.png"
+      }
+    ]
+  },
+  {
+    "name": "Mcdonald",
+    "iconPath": "assets/images/Mcd.jpg",
+    "score": "4.8",
+    "duration": "30mins",
+    "fee": "$1.00",
+    "sales": "Monthly sales 5000+",
+    "menuItems": [
+      {
+        "name": "Big Mac",
+        "description": "Classic beef burger",
+        "price": 15,
+        "category": "Best Sales",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "French Fries",
+        "description": "Crispy fries",
+        "price": 8,
+        "category": "Snacks",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Chicken McNuggets",
+        "description": "Juicy chicken nuggets",
+        "price": 10,
+        "category": "Snacks",
+        "imagePath": "assets/images/placeholder.png"
+      }
+    ]
+  },
+  {
+    "name": "Food By K",
+    "iconPath": "assets/images/logo1.jpg",
+    "score": "4.6",
+    "duration": "45mins",
+    "fee": "$1.00",
+    "sales": "Monthly sales 1800+",
+    "menuItems": [
+      {
+        "name": "Laksa",
+        "description": "Spicy coconut noodle soup",
+        "price": 14,
+        "category": "Noodles",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Nasi Lemak",
+        "description": "Coconut rice with spicy sambal",
+        "price": 12,
+        "category": "Rice",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Tom Yum",
+        "description": "Spicy Thai soup",
+        "price": 13,
+        "category": "Best Sales",
+        "imagePath": "assets/images/placeholder.png"
+      }
+    ]
+  },
+  {
+    "name": "SuanYu House",
+    "iconPath": "assets/images/logo2.jpg",
+    "score": "4.5",
+    "duration": "20mins",
+    "fee": "$0.50",
+    "sales": "Monthly sales 2200+",
+    "menuItems": [
+      {
+        "name": "Suan Cai Yu",
+        "description": "Spicy pickled fish",
+        "price": 18,
+        "category": "Best Sales",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Rice Noodles",
+        "description": "Smooth rice noodles",
+        "price": 10,
+        "category": "Noodles",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Tofu Soup",
+        "description": "Silky tofu in soup",
+        "price": 9,
+        "category": "Soup",
+        "imagePath": "assets/images/placeholder.png"
+      }
+    ]
+  },
+  {
+    "name": "UKIYO RAMEN",
+    "iconPath": "assets/images/logo3.jpg",
+    "score": "4.0",
+    "duration": "60mins",
+    "fee": "$1.50",
+    "sales": "Monthly sales 1500+",
+    "menuItems": [
+      {
+        "name": "Tonkotsu Ramen",
+        "description": "Pork bone broth ramen",
+        "price": 16,
+        "category": "Best Sales",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Takoyaki",
+        "description": "Grilled octopus balls",
+        "price": 9,
+        "category": "Snacks",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Salmon Sushi",
+        "description": "Fresh salmon sushi",
+        "price": 14,
+        "category": "Sushi",
+        "imagePath": "assets/images/placeholder.png"
+      }
+    ]
+  }
+]

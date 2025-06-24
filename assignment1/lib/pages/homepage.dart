@@ -563,11 +563,16 @@ Indulge in our cheesy pizza offer:
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                Navigator.push(
+                            Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MenuPage()),
+                  MaterialPageRoute(
+                    builder: (context) => MenuPage(
+                      restaurantName: RestaurantList[index].name,
+                    ),
+                  ),
                 );
               },
+
               child: Container(
                 height: 110,
                 decoration: BoxDecoration(
