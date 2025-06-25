@@ -278,56 +278,56 @@
         "description": "Pork bone broth ramen",
         "price": 16,
         "category": "Best Sales",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Tonkotsu Ramen.jpg"
       },
       {
         "name": "Takoyaki",
         "description": "Grilled octopus balls",
         "price": 9,
         "category": "Snacks",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Takoyaki.jpg"
       },
       {
         "name": "Salmon Sushi",
         "description": "Fresh salmon sushi",
         "price": 14,
         "category": "Sushi",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Salmon Sushi.jpg"
+      },
+      {
+        "name": "Salmon Sushi",
+        "description": "Fresh salmon sushi",
+        "price": 14,
+        "category": "Sushi",
+        "imagePath": "assets/images/menu_food/Salmon Sushi.jpg"
+      },
+      {
+        "name": "Tuna Sushi",
+        "description": "Delicate tuna slices on vinegared rice",
+        "price": 13,
+        "category": "Sushi",
+        "imagePath": "assets/images/menu_food/Tuna Sushi.jpg"
+      },
+      {
+        "name": "Eel Sushi",
+        "description": "Grilled eel glazed with sweet soy sauce",
+        "price": 15,
+        "category": "Sushi",
+        "imagePath": "assets/images/menu_food/Eel Sushi.jpg"
       },
       {
         "name": "Shoyu Ramen",
         "description": "Soy sauce-based ramen",
         "price": 15,
         "category": "Ramen",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Shoyu Ramen.jpg"
       },
       {
         "name": "Gyoza",
         "description": "Pan-fried dumplings",
         "price": 10,
         "category": "Snacks",
-        "imagePath": "assets/images/placeholder.png"
-      },
-      {
-        "name": "Fried Rice",
-        "description": "Classic egg fried rice",
-        "price": 11,
-        "category": "Rice",
-        "imagePath": "assets/images/placeholder.png"
-      },
-      {
-        "name": "Spicy Chicken",
-        "description": "Hot and crispy chicken chunks",
-        "price": 14,
-        "category": "Best Sales",
-        "imagePath": "assets/images/placeholder.png"
-      },
-      {
-        "name": "Seaweed Soup",
-        "description": "Healthy seaweed soup",
-        "price": 9,
-        "category": "Soup",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Gyoza.jpg"
       }
     ]
   }
