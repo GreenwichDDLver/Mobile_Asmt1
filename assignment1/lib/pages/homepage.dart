@@ -9,6 +9,7 @@ import 'package:assignment1/pages/search_page.dart';
 import 'package:assignment1/pages/personal_page.dart';
 import 'package:assignment1/widgets/cart_panel.dart';
 import 'package:assignment1/widgets/homepage_banner.dart';
+import 'package:assignment1/pages/categories_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -286,46 +287,60 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 分类区
-  Column _categorySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100]?.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  "Category",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+  // 在 _categorySection() 方法中的分类项构建部分，将原来的 Container 包装在 GestureDetector 中
+
+// 分类区
+Column _categorySection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(left: 20, right: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.orange[100]?.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                "Category",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              Image.asset("assets/images/usagi3.png", width: 130, height: 90),
-            ],
-          ),
+            ),
+            Image.asset("assets/images/usagi3.png", width: 130, height: 90),
+          ],
         ),
-        const SizedBox(height: 0),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Wrap(
-            spacing: 17,
-            runSpacing: 10,
-            children: List.generate(categories.length, (index) {
-              return SizedBox(
+      ),
+      const SizedBox(height: 0),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Wrap(
+          spacing: 17,
+          runSpacing: 10,
+          children: List.generate(categories.length, (index) {
+            return GestureDetector(
+              onTap: () {
+                // 点击分类时跳转到分类页面
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoriesPage(
+                      categoryName: categories[index].name,
+                    ),
+                  ),
+                );
+              },
+              child: SizedBox(
                 width:
                     (MediaQuery.of(context).size.width - 20 * 2 - 15 * 3) / 3,
                 height: 118,
@@ -365,13 +380,14 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   // 最近活动标题
   Column _recentActivitiesSection() {

@@ -12,21 +12,51 @@
         "description": "Monthly sales 1000+ The Best Seller",
         "price": 12,
         "category": "Best Sales",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/item2.jpg"
       },
       {
         "name": "Dumpling",
         "description": "Monthly sales 300+ Public Recommend",
         "price": 13,
         "category": "Dumpling",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/item2.jpg"
+      },
+    
+      {
+        "name": "Xiao Long Bao",
+        "description": "Soup-filled dumplings",
+        "price": 14,
+        "category": "Dumpling",
+        "imagePath": "assets/images/item1.jpg"
       },
       {
-        "name": "Steam Bread",
-        "description": "Monthly sales 200+ Recommend",
-        "price": 13,
+        "name": "Braised Pork",
+        "description": "Tender pork in soy sauce",
+        "price": 18,
+        "category": "Best Sales",
+        "imagePath": "assets/images/menu_food/Braised-Pork.png"
+      },
+      {
+        "name": "Fried Rice",
+        "description": "Wok-fried rice with egg and peas",
+        "price": 11,
         "category": "Rice",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/fried rice.jpg"
+      },
+
+      {
+        "name": "Spicy Chicken",
+        "description": "Hot and crispy chicken chunks",
+        "price": 14,
+        "category": "Best Sales",
+        "imagePath": "assets/images/menu_food/Spicy chiken.jpg"
+      },
+      {
+        "name": "Seaweed Soup",
+        "description": "Healthy seaweed soup",
+        "price": 9,
+        "category": "Soup",
+        "imagePath": "assets/images/menu_food/seaweed soup.jpg"
       }
     ]
   },
@@ -43,22 +73,75 @@
         "description": "Classic beef burger",
         "price": 15,
         "category": "Best Sales",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/big.jpg"
+      },
+
+      {
+        "name": "Spicy Chicken McDeluxe",
+        "description": "Classic chicken burger",
+        "price": 12,
+        "category": "Burger",
+        "imagePath": "assets/images/menu_food/spicy chiken mcdeluxe.jpg"
+      },
+      {
+        "name": "Filet-O-Fish",
+        "description": " ",
+        "price": 12.5,
+        "category": "Burger",
+        "imagePath": "assets/images/menu_food/Filet-O-Fish.jpg"
+      },
+
+      {
+        "name": "Double Cheeseburger",
+        "description": " ",
+        "price": 13.9,
+        "category": "Burger",
+        "imagePath": "assets/images/menu_food/Double Cheeseburger.png"
       },
       {
         "name": "French Fries",
         "description": "Crispy fries",
         "price": 8,
         "category": "Snacks",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/French Fries.png"
       },
       {
         "name": "Chicken McNuggets",
         "description": "Juicy chicken nuggets",
         "price": 10,
         "category": "Snacks",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Chicken McNuggets.png"
+      },
+      {
+        "name": "McChicken",
+        "description": "Tender chicken burger",
+        "price": 13,
+        "category": "Best Sales",
+        "imagePath": "assets/images/menu_food/McChicken.jpg"
+      },
+      {
+        "name": "Apple Pie",
+        "description": "Warm apple filling in crisp shell",
+        "price": 5,
+        "category": "Desserts",
+        "imagePath": "assets/images/menu_food/Apple Pie.jpg"
+      },
+      {
+        "name": "Iced Cola",
+        "description": "Chilled soft drink",
+        "price": 4,
+        "category": "Drinks",
+        "imagePath": "assets/images/menu_food/cola.png"
+      },
+      {
+        "name": "Iced Latte",
+        "description": " ",
+        "price": 5,
+        "category": "Drinks",
+        "imagePath": "assets/images/menu_food/Iced Latte.jpg"
       }
+      
+ 
     ]
   },
   {
@@ -70,28 +153,51 @@
     "sales": "Monthly sales 1800+",
     "menuItems": [
       {
+        "name": "Tom Yum",
+        "description": "Spicy Thai soup",
+        "price": 13,
+        "category": "Best Sales",
+        "imagePath": "assets/images/menu_food/Tom Yum.jpg"
+      },
+      {
         "name": "Laksa",
         "description": "Spicy coconut noodle soup",
         "price": 14,
         "category": "Noodles",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/laksa.jpg"
       },
       {
         "name": "Nasi Lemak",
         "description": "Coconut rice with spicy sambal",
         "price": 12,
         "category": "Rice",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Nasi Lemak.jpg"
+      },
+      
+      {
+        "name": "Pad Thai",
+        "description": "Stir-fried Thai noodles",
+        "price": 13,
+        "category": "Noodles",
+        "imagePath": "assets/images/menu_food/Pad Thai.jpg"
       },
       {
-        "name": "Tom Yum",
-        "description": "Spicy Thai soup",
-        "price": 13,
-        "category": "Best Sales",
-        "imagePath": "assets/images/placeholder.png"
+        "name": "Green Curry",
+        "description": "Thai green curry with chicken",
+        "price": 14,
+        "category": "Curry",
+        "imagePath": "assets/images/menu_food/Green Curry.jpg"
+      },
+      {
+        "name": "Roti",
+        "description": "Classic roti",
+        "price": 5,
+        "category": "Snacks",
+        "imagePath": "assets/images/menu_food/Roti.jpg"
       }
     ]
   },
+
   {
     "name": "SuanYu House",
     "iconPath": "assets/images/logo2.jpg",
@@ -105,24 +211,60 @@
         "description": "Spicy pickled fish",
         "price": 18,
         "category": "Best Sales",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Suan Cai Yu.jpg"
       },
       {
         "name": "Rice Noodles",
         "description": "Smooth rice noodles",
         "price": 10,
         "category": "Noodles",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Rice Noodles.jpg"
       },
       {
         "name": "Tofu Soup",
         "description": "Silky tofu in soup",
         "price": 9,
         "category": "Soup",
-        "imagePath": "assets/images/placeholder.png"
+        "imagePath": "assets/images/menu_food/Tofu Soup.jpg"
+      },
+      {
+        "name": "Beef Hotpot",
+        "description": "Spicy beef hotpot",
+        "price": 19,
+        "category": "Hotpot",
+        "imagePath": "assets/images/menu_food/Beef Hotpot.jpg"
+      },
+      {
+        "name": "Garden Salad",
+        "description": "Crisp mixed greens and fresh vegetables",
+        "price": 11,
+        "category": "Salad",
+        "imagePath": "assets/images/menu_food/Garden Salad.jpg"
+      },
+      {
+        "name": "Fried Rice",
+        "description": "Classic egg fried rice",
+        "price": 11,
+        "category": "Rice",
+        "imagePath": "assets/images/menu_food/fried rice.jpg"
+      },
+      {
+        "name": "Koushui  Chicken",
+        "description": "Hot and crispy chicken chunks",
+        "price": 14,
+        "category": "Best Sales",
+        "imagePath": "assets/images/menu_food/koushui chicken.jpg"
+      },
+      {
+        "name": "Mushroom Soup",
+        "description": "Healthy mushroom soup",
+        "price": 9,
+        "category": "Soup",
+        "imagePath": "assets/images/menu_food/Mushroom Soup.jpg"
       }
     ]
   },
+
   {
     "name": "UKIYO RAMEN",
     "iconPath": "assets/images/logo3.jpg",
@@ -150,6 +292,41 @@
         "description": "Fresh salmon sushi",
         "price": 14,
         "category": "Sushi",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Shoyu Ramen",
+        "description": "Soy sauce-based ramen",
+        "price": 15,
+        "category": "Ramen",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Gyoza",
+        "description": "Pan-fried dumplings",
+        "price": 10,
+        "category": "Snacks",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Fried Rice",
+        "description": "Classic egg fried rice",
+        "price": 11,
+        "category": "Rice",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Spicy Chicken",
+        "description": "Hot and crispy chicken chunks",
+        "price": 14,
+        "category": "Best Sales",
+        "imagePath": "assets/images/placeholder.png"
+      },
+      {
+        "name": "Seaweed Soup",
+        "description": "Healthy seaweed soup",
+        "price": 9,
+        "category": "Soup",
         "imagePath": "assets/images/placeholder.png"
       }
     ]

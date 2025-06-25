@@ -23,7 +23,7 @@ class CategoryModel {
 
     categories.add(
       CategoryModel(
-        name: "Fast Food",
+        name: "Burger",
         iconPath: "assets/icons/fast food.svg",
         boxColor: const Color(0xFFACFEFF),
       ),
@@ -31,8 +31,8 @@ class CategoryModel {
 
     categories.add(
       CategoryModel(
-        name: "Steak",
-        iconPath: "assets/icons/steak.svg",
+        name: "Soup",
+        iconPath: "assets/icons/soup.svg",
         boxColor: const Color(0xFFACFEFF),
       ),
     );
@@ -49,7 +49,7 @@ class CategoryModel {
 
     categories.add(
       CategoryModel(
-        name: "Beverages",
+        name: "Drinks",
         iconPath: "assets/icons/beverages.svg",
         boxColor: const Color(0xFFACFEFF),
       ),

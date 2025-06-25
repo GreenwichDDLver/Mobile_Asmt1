@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/MenuItem.dart';
+import '../models/RestaurantList.dart'; 
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -36,20 +37,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
   double _getDeliveryFee(String? restaurantName) {
     if (restaurantName == null) return 0.0;
     
-    switch (restaurantName) {
-      case 'Hang Zhou Flavor':
-        return 2.99;
-      case 'Mcdonald':
-        return 1.99;
-      case 'Food By K':
-        return 3.49;
-      case 'SuanYu House':
-        return 2.49;
-      case 'UKIYO RAMEN':
-        return 3.99;
-      default:
-        return 2.99;
-    }
+    // 从RestaurantListModel获取配送费
+    final restaurants = RestaurantListModel.getRestaurantList();
+    final restaurant = restaurants.firstWhere(
+      (r) => r.name == restaurantName,
+      orElse: () => RestaurantListModel(
+        name: '',
+        iconPath: '',
+        score: '',
+        duration: '',
+        fee: '\$0.00',
+        boxColor: Colors.grey,
+      ),
+    );
+    
+    // 解析fee字符串，去掉$符号并转换为double
+    final feeString = restaurant.fee.replaceAll('\$', '');
+    return double.tryParse(feeString) ?? 0.0;
   }
 
   void _applyPromoCode() {
