@@ -118,8 +118,6 @@ flutter:
     - assets/images/placeholder.png
     - assets/data/restaurants_menu_data.json
   #以下是fooditem图片
-flutter:
-  assets:
     - assets/images/menu_food/Apple Pie.jpg
     - assets/images/menu_food/Beef Hotpot.jpg
     - assets/images/menu_food/big.jpg
@@ -127,13 +125,11 @@ flutter:
     - assets/images/menu_food/Chicken McNuggets.png
     - assets/images/menu_food/cola.png
     - assets/images/menu_food/Double Cheeseburger.png
-    - assets/images/menu_food/Eel Sushi.jpg
     - assets/images/menu_food/Filet-O-Fish.jpg
     - assets/images/menu_food/French Fries.png
     - assets/images/menu_food/fried rice.jpg
     - assets/images/menu_food/Garden Salad.jpg
     - assets/images/menu_food/Green Curry.jpg
-    - assets/images/menu_food/Gyoza.jpg
     - assets/images/menu_food/Iced Latte.jpg
     - assets/images/menu_food/koushui chicken.jpg
     - assets/images/menu_food/laksa.jpg
@@ -141,20 +137,14 @@ flutter:
     - assets/images/menu_food/Mushroom Soup.jpg
     - assets/images/menu_food/Nasi Lemak.jpg
     - assets/images/menu_food/Pad Thai.jpg
-    - assets/images/menu_food/Rice Noodles.jpg
     - assets/images/menu_food/Roti.jpg
-    - assets/images/menu_food/Salmon Sushi.jpg
     - assets/images/menu_food/seaweed soup.jpg
-    - assets/images/menu_food/Shoyu Ramen.jpg
     - assets/images/menu_food/spicy chiken mcdeluxe.jpg
     - assets/images/menu_food/Spicy chiken.jpg
     - assets/images/menu_food/Suan Cai Yu.jpg
-    - assets/images/menu_food/Takoyaki.jpg
     - assets/images/menu_food/Tofu Soup.jpg
     - assets/images/menu_food/Tom Yum.jpg
-    - assets/images/menu_food/Tonkotsu Ramen.jpg
-    - assets/images/menu_food/Tuna Sushi.jpg
-
+    - assets/images/menu_food/Rice Noodles.jpg
   #riderotw.jpg图片没有放，记得改
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
