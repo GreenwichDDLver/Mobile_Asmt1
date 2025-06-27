@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "146429905842",
+    "project_id": "orderingmobile",
+    "storage_bucket": "orderingmobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146429905842:android:b2164d2118fd6c431ab2ab",
+        "android_client_info": {
+          "package_name": "com.example.assignment1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQKuzmv6xMhAcYU3iMk7ykTUrt8kSZUB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
