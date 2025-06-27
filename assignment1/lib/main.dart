@@ -6,6 +6,7 @@ import 'package:assignment1/pages/message_page.dart';
 import 'package:assignment1/pages/splash_page.dart';
 import 'package:assignment1/pages/categories_page.dart';
 import 'package:assignment1/models/cart_model.dart';
+import 'pages/login_page.dart';
 
 void main() {
   runApp(
