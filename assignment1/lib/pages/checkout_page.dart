@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/MenuItem.dart';
-import '../models/RestaurantList.dart'; 
+import '../models/RestaurantList.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -17,11 +17,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _promoCodeController = TextEditingController();
-  
+
   String _selectedPaymentMethod = 'Credit Card';
   double _promoDiscount = 0.0;
   bool _isPromoApplied = false;
-  
+
   // 费用常量
   static const double _taxRate = 0.08; // 8% 税率
 
@@ -36,21 +36,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   double _getDeliveryFee(String? restaurantName) {
     if (restaurantName == null) return 0.0;
-    
+
     // 从RestaurantListModel获取配送费
     final restaurants = RestaurantListModel.getRestaurantList();
     final restaurant = restaurants.firstWhere(
       (r) => r.name == restaurantName,
-      orElse: () => RestaurantListModel(
-        name: '',
-        iconPath: '',
-        score: '',
-        duration: '',
-        fee: '\$0.00',
-        boxColor: Colors.grey,
-      ),
+      orElse:
+          () => RestaurantListModel(
+            name: '',
+            iconPath: '',
+            score: '',
+            duration: '',
+            fee: '\$0.00',
+            boxColor: Colors.grey,
+          ),
     );
-    
+
     // 解析fee字符串，去掉$符号并转换为double
     final feeString = restaurant.fee.replaceAll('\$', '');
     return double.tryParse(feeString) ?? 0.0;
@@ -143,9 +144,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   SizedBox(height: 16),
-                  Text('Your cart is empty', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                  Text(
+                    'Your cart is empty',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
                 ],
               ),
             );
@@ -154,9 +162,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
           final subtotal = cart.totalPrice;
           final tax = subtotal * _taxRate;
           final deliveryFee = _getDeliveryFee(cart.currentRestaurant);
-          final discount = _isPromoApplied 
-              ? (_promoDiscount < 1 ? subtotal * _promoDiscount : _promoDiscount)
-              : 0.0;
+          final discount =
+              _isPromoApplied
+                  ? (_promoDiscount < 1
+                      ? subtotal * _promoDiscount
+                      : _promoDiscount)
+                  : 0.0;
           final total = subtotal + tax + deliveryFee - discount;
 
           return SingleChildScrollView(
@@ -188,7 +199,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.restaurant, color: Colors.orange),
+                              const Icon(
+                                Icons.restaurant,
+                                color: Colors.orange,
+                              ),
                               const SizedBox(width: 12),
                               Text(
                                 cart.currentRestaurant!,
@@ -202,18 +216,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                       ],
                     ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // 订单详情
                   _buildSectionCard(
                     title: 'Order Summary',
                     child: Column(
-                      children: cart.items.entries.map((entry) {
-                        final item = entry.key;
-                        final quantity = entry.value;
-                        return _buildOrderItem(item, quantity);
-                      }).toList(),
+                      children:
+                          cart.items.entries.map((entry) {
+                            final item = entry.key;
+                            final quantity = entry.value;
+                            return _buildOrderItem(item, quantity);
+                          }).toList(),
                     ),
                   ),
 
@@ -285,19 +300,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           'Credit Card',
                           'Pay with credit/debit card',
                           _selectedPaymentMethod,
-                          (value) => setState(() => _selectedPaymentMethod = value!),
+                          (value) =>
+                              setState(() => _selectedPaymentMethod = value!),
                         ),
                         _buildRadioOption(
                           'PayPal',
                           'Pay with PayPal account',
                           _selectedPaymentMethod,
-                          (value) => setState(() => _selectedPaymentMethod = value!),
+                          (value) =>
+                              setState(() => _selectedPaymentMethod = value!),
                         ),
                         _buildRadioOption(
                           'Cash on Delivery',
                           'Pay when food arrives',
                           _selectedPaymentMethod,
-                          (value) => setState(() => _selectedPaymentMethod = value!),
+                          (value) =>
+                              setState(() => _selectedPaymentMethod = value!),
                         ),
                       ],
                     ),
@@ -325,7 +343,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orangeAccent,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
                           ),
                           child: const Text('Apply'),
                         ),
@@ -344,7 +365,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         _buildPriceRow('Tax (8%)', tax),
                         _buildPriceRow('Delivery Fee', deliveryFee),
                         if (_isPromoApplied)
-                          _buildPriceRow('Discount', -discount, color: Colors.green),
+                          _buildPriceRow(
+                            'Discount',
+                            -discount,
+                            color: Colors.green,
+                          ),
                         const Divider(thickness: 2),
                         _buildPriceRow('Total', total, isTotal: true),
                       ],
@@ -413,62 +438,97 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildOrderItem(MenuItem item, int quantity) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              item.imagePath,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
+    return Consumer<CartModel>(
+      builder: (context, cart, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  item.imagePath,
                   width: 50,
                   height: 50,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                );
-              },
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 50,
+                      height: 50,
+                      color: Colors.grey[200],
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
                 ),
-                Text(
-                  '\$${item.price.toStringAsFixed(2)} × $quantity',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '\$${item.price.toStringAsFixed(2)} × $quantity',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\$${(item.price * quantity).toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // 减选按钮
+                  GestureDetector(
+                    onTap: () {
+                      cart.removeItem(item);
+                    },
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.red[100],
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.red[300]!, width: 1),
+                      ),
+                      child: const Icon(
+                        Icons.remove,
+                        color: Colors.red,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Text(
-            '\$${(item.price * quantity).toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildRadioOption(String value, String subtitle, String groupValue, void Function(String?) onChanged) {
+  Widget _buildRadioOption(
+    String value,
+    String subtitle,
+    String groupValue,
+    void Function(String?) onChanged,
+  ) {
     return RadioListTile<String>(
       title: Text(value),
       subtitle: Text(subtitle),
@@ -479,7 +539,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildPriceRow(String label, double amount, {bool isTotal = false, Color? color}) {
+  Widget _buildPriceRow(
+    String label,
+    double amount, {
+    bool isTotal = false,
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

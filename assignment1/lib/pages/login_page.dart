@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/account_manager.dart';
 import 'register_page.dart';
+import '../main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,21 +19,21 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text;
     bool exists = await AccountManager.accountExists(username);
     if (!exists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('账号不存在')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('账号不存在')));
       return;
     }
     bool valid = await AccountManager.validateAccount(username, password);
     if (valid) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DummyHomePage()),
+        MaterialPageRoute(builder: (context) => const MainNavigationWrapper()),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('密码错误')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('密码错误')));
     }
   }
 
@@ -63,22 +64,10 @@ class _LoginPageState extends State<LoginPage> {
                 );
               },
               child: const Text('没有账号？注册'),
-            )
+            ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class DummyHomePage extends StatelessWidget {
-  const DummyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('个人主页')),
-      body: const Center(child: Text('欢迎回来！')),
     );
   }
 }

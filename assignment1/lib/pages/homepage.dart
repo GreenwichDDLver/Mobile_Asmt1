@@ -165,62 +165,62 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 修改后的appbar，地点可点击选择城市
+  // 修改后的appbar，左侧为人物图标，点击跳转个人主页
   AppBar _appBarFunction() {
     return AppBar(
       backgroundColor: Colors.orange[100]?.withOpacity(0.9),
       elevation: 0,
       centerTitle: false,
-      title: GestureDetector(
-        onTap: _showCitySelectionDialog,
-        child: Row(
-          children: [
-            const Icon(Icons.location_on, color: Colors.black, size: 20),
-            const SizedBox(width: 5),
-            Expanded(
-              child: Text(
-                _selectedCity,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.black, fontSize: 14),
+      toolbarHeight: 80, // 增大AppBar高度
+      leading: Builder(
+        builder:
+            (context) => Padding(
+              padding: const EdgeInsets.only(
+                left: 18,
+                top: 8,
+                bottom: 8,
+              ), // 右移并上下居中
+              child: IconButton(
+                icon: const Icon(
+                  Icons.person,
+                  color: Colors.orange,
+                  size: 36,
+                ), // 更大的人像图标
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Colors.black),
-          ],
-        ),
       ),
-      /*
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 15),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PersonalHomePage(),
-                ),
-              );
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+      title: Align(
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: _showCitySelectionDialog,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 160), // 地址选择模块变窄
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.0),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.location_on, color: Colors.black, size: 20),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    _selectedCity,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.black, fontSize: 14),
                   ),
-                ],
-              ),
-              child: Icon(Icons.person, color: Colors.orange[500], size: 22),
+                ),
+                const Icon(Icons.arrow_drop_down, color: Colors.black),
+              ],
             ),
           ),
         ),
-      ],
-      */
+      ),
     );
   }
 
@@ -289,105 +289,106 @@ class _HomePageState extends State<HomePage> {
 
   // 在 _categorySection() 方法中的分类项构建部分，将原来的 Container 包装在 GestureDetector 中
 
-// 分类区
-Column _categorySection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 20, right: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.orange[100]?.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                "Category",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+  // 分类区
+  Column _categorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100]?.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  "Category",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-            Image.asset("assets/images/usagi3.png", width: 130, height: 90),
-          ],
+              Image.asset("assets/images/usagi3.png", width: 130, height: 90),
+            ],
+          ),
         ),
-      ),
-      const SizedBox(height: 0),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: Wrap(
-          spacing: 17,
-          runSpacing: 10,
-          children: List.generate(categories.length, (index) {
-            return GestureDetector(
-              onTap: () {
-                // 点击分类时跳转到分类页面
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CategoriesPage(
-                      categoryName: categories[index].name,
+        const SizedBox(height: 0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Wrap(
+            spacing: 17,
+            runSpacing: 10,
+            children: List.generate(categories.length, (index) {
+              return GestureDetector(
+                onTap: () {
+                  // 点击分类时跳转到分类页面
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => CategoriesPage(
+                            categoryName: categories[index].name,
+                          ),
                     ),
-                  ),
-                );
-              },
-              child: SizedBox(
-                width:
-                    (MediaQuery.of(context).size.width - 20 * 2 - 15 * 3) / 3,
-                height: 118,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: categories[index].boxColor.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: 70,
-                        width: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.95),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: SvgPicture.asset(
-                            categories[index].iconPath,
-                            fit: BoxFit.contain,
+                  );
+                },
+                child: SizedBox(
+                  width:
+                      (MediaQuery.of(context).size.width - 20 * 2 - 15 * 3) / 3,
+                  height: 118,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: categories[index].boxColor.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 70,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.95),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: SvgPicture.asset(
+                              categories[index].iconPath,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        categories[index].name,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: 8),
+                        Text(
+                          categories[index].name,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   // 最近活动标题
   Column _recentActivitiesSection() {
@@ -579,12 +580,13 @@ Indulge in our cheesy pizza offer:
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                            Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MenuPage(
-                      restaurantName: RestaurantList[index].name,
-                    ),
+                    builder:
+                        (context) => MenuPage(
+                          restaurantName: RestaurantList[index].name,
+                        ),
                   ),
                 );
               },

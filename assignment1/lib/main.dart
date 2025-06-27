@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:assignment1/pages/homepage.dart';
 import 'package:assignment1/pages/order_page.dart';
-import 'package:assignment1/pages/message_page.dart'; 
+import 'package:assignment1/pages/message_page.dart';
 import 'package:assignment1/pages/splash_page.dart';
 import 'package:assignment1/pages/categories_page.dart';
 import 'package:assignment1/models/cart_model.dart';
@@ -22,9 +22,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'Smart Shop',
       debugShowCheckedModeBanner: false,
-      home:  SplashPage(),
+      theme: ThemeData(primarySwatch: Colors.orange),
+      home: const SplashPage(), // Start with splash screen
     );
   }
 }
