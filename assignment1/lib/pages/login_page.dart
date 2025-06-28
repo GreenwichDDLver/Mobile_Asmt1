@@ -1,5 +1,6 @@
+import 'package:assignment1/pages/forgetPassword_page.dart';
 import 'package:flutter/material.dart';
-import '../utils/account_manager.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'register_page.dart';
 import '../main.dart';
 
@@ -11,11 +12,25 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your email';
+    }
+    
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+    
+    return null;
+  }
 
   void _login() async {
     if (!_formKey.currentState!.validate()) {
@@ -26,43 +41,74 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    String username = _usernameController.text.trim();
+    String email = _emailController.text.trim();
     String password = _passwordController.text;
     
     try {
-      bool exists = await AccountManager.accountExists(username);
-      if (!exists) {
-        _showErrorSnackBar('Account doesn\'t exist');
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      // Check if email is verified
+      User? user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await _auth.signOut();
+        _showErrorSnackBar('Please verify your email before logging in. Check your inbox.');
         return;
       }
       
-      bool valid = await AccountManager.validateAccount(username, password);
-      if (valid) {
+      if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainNavigationWrapper()),
         );
-      } else {
-        _showErrorSnackBar('Wrong password');
       }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address format.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This account has been disabled.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          errorMessage = 'Login failed. Please check your credentials.';
+      }
+      _showErrorSnackBar(errorMessage);
     } catch (e) {
-      _showErrorSnackBar('Login failed. Please try again.');
+      _showErrorSnackBar('An unexpected error occurred. Please try again.');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade400,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 
   @override
@@ -123,12 +169,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 50),
 
-                // Username Field
+                // Email Field
                 TextFormField(
-                  controller: _usernameController,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Username',
-                    prefixIcon: Icon(Icons.person_outline, color: Colors.grey.shade600),
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_outlined, color: Colors.grey.shade600),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -149,12 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderSide: BorderSide(color: Colors.red.shade400),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
+                  validator: _validateEmail,
                 ),
                 const SizedBox(height: 20),
 
@@ -203,7 +245,28 @@ class _LoginPageState extends State<LoginPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 16),
+
+                // Forgot Password Link
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                      );
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Colors.blue.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
 
                 // Login Button
                 SizedBox(
@@ -293,7 +356,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

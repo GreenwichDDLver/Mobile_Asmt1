@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:assignment1/pages/homepage.dart';
 import 'package:assignment1/pages/order_page.dart';
 import 'package:assignment1/pages/message_page.dart';
@@ -7,8 +8,13 @@ import 'package:assignment1/pages/splash_page.dart';
 import 'package:assignment1/pages/categories_page.dart';
 import 'package:assignment1/models/cart_model.dart';
 import 'pages/login_page.dart';
-
-void main() {
+import 'firebase_options.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => CartModel())],
