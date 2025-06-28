@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'menu_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  final String? userId; // 添加用户ID参数，用于区分不同用户的搜索历史
+  
+  const SearchPage({Key? key, this.userId}) : super(key: key);
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -10,19 +14,185 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
   List<String> _searchHistory = [];
   List<String> _hotSearches = ['Suanyu House', 'Food by K', 'Hangzhou Flavor'];
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
+  bool _isLoadingHistory = true;
+
+  // 获取用户ID，如果没有提供则使用默认用户
+  String get _getUserId => widget.userId ?? 'default_user';
 
   @override
   void initState() {
     super.initState();
-    _searchHistory = ['mcdonald'];
+    _loadSearchHistory();
+  }
+
+  // 从Firebase加载搜索历史
+  Future<void> _loadSearchHistory() async {
+    try {
+      setState(() {
+        _isLoadingHistory = true;
+      });
+
+      final doc = await _firestore
+          .collection('users')
+          .doc(_getUserId)
+          .collection('search_history')
+          .doc('history')
+          .get();
+
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        final historyList = List<String>.from(data['searches'] ?? []);
+        
+        setState(() {
+          _searchHistory = historyList.reversed.take(10).toList(); // 只保留最近10条记录
+          _isLoadingHistory = false;
+        });
+      } else {
+        // 如果没有历史记录，创建空的文档
+        await _createEmptyHistoryDocument();
+        setState(() {
+          _searchHistory = [];
+          _isLoadingHistory = false;
+        });
+      }
+    } catch (e) {
+      print('加载搜索历史失败: $e');
+      setState(() {
+        _searchHistory = [];
+        _isLoadingHistory = false;
+      });
+    }
+  }
+
+  // 创建空的历史记录文档
+  Future<void> _createEmptyHistoryDocument() async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_getUserId)
+          .collection('search_history')
+          .doc('history')
+          .set({
+        'searches': [],
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('创建历史记录文档失败: $e');
+    }
+  }
+
+  // 保存搜索历史到Firebase
+  Future<void> _saveSearchToHistory(String query) async {
+    if (query.trim().isEmpty) return;
+
+    try {
+      // 先从本地历史中移除重复项
+      _searchHistory.removeWhere((item) => item.toLowerCase() == query.toLowerCase());
+      
+      // 添加新的搜索词到开头
+      _searchHistory.insert(0, query);
+      
+      // 只保留最近20条记录
+      if (_searchHistory.length > 20) {
+        _searchHistory = _searchHistory.take(20).toList();
+      }
+
+      // 保存到Firebase
+      await _firestore
+          .collection('users')
+          .doc(_getUserId)
+          .collection('search_history')
+          .doc('history')
+          .set({
+        'searches': _searchHistory,
+        'updated_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // 更新UI
+      setState(() {});
+      
+    } catch (e) {
+      print('保存搜索历史失败: $e');
+      // 即使保存失败，也更新本地状态
+      setState(() {
+        _searchHistory.removeWhere((item) => item.toLowerCase() == query.toLowerCase());
+        _searchHistory.insert(0, query);
+        if (_searchHistory.length > 20) {
+          _searchHistory = _searchHistory.take(20).toList();
+        }
+      });
+    }
+  }
+
+  // 清空搜索历史
+  Future<void> _clearSearchHistory() async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_getUserId)
+          .collection('search_history')
+          .doc('history')
+          .update({
+        'searches': [],
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+
+      setState(() {
+        _searchHistory.clear();
+      });
+
+      // 显示成功提示
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('搜索历史已清空'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('清空搜索历史失败: $e');
+      // 显示错误提示
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('清空搜索历史失败，请重试'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  // 删除单个搜索历史项
+  Future<void> _removeSearchHistoryItem(String query) async {
+    try {
+      _searchHistory.removeWhere((item) => item == query);
+
+      await _firestore
+          .collection('users')
+          .doc(_getUserId)
+          .collection('search_history')
+          .doc('history')
+          .update({
+        'searches': _searchHistory,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+
+      setState(() {});
+    } catch (e) {
+      print('删除搜索历史项失败: $e');
+    }
   }
 
   void _performSearch(String query) {
     if (query.isEmpty) return;
+
+    // 保存到搜索历史
+    _saveSearchToHistory(query);
 
     setState(() {
       _isSearching = true;
@@ -35,12 +205,12 @@ class _SearchPageState extends State<SearchPage> {
           },
           {
             'name': 'Result Restaurant 2',
-            'image': Icons.fastfood,  // 使用通用食物图标
+            'image': Icons.fastfood,
             'rating': 4.2,
           },
           {
             'name': 'Result Restaurant 3',
-            'image': Icons.fastfood,  // 使用通用食物图标
+            'image': Icons.fastfood,
             'rating': 4.8,
           },
         ];
@@ -53,23 +223,17 @@ class _SearchPageState extends State<SearchPage> {
           },
           {
             'name': 'Result Restaurant 2',
-            'image': Icons.fastfood,  // 使用通用食物图标
+            'image': Icons.fastfood,
             'rating': 4.2,
           },
           {
             'name': 'Result Restaurant 3',
-            'image': Icons.fastfood,  // 使用通用食物图标
+            'image': Icons.fastfood,
             'rating': 4.8,
           },
         ];
       }
       _isSearching = false;
-    });
-  }
-
-  void _clearSearchHistory() {
-    setState(() {
-      _searchHistory.clear();
     });
   }
 
@@ -132,7 +296,14 @@ class _SearchPageState extends State<SearchPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (_searchHistory.isNotEmpty) ...[
+          if (_isLoadingHistory) ...[
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ] else if (_searchHistory.isNotEmpty) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -159,6 +330,31 @@ class _SearchPageState extends State<SearchPage> {
                     _searchController.text = history;
                     _performSearch(history);
                   },
+                  onLongPress: () {
+                    // 长按删除单个历史记录
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('删除搜索记录'),
+                          content: Text('确定要删除 "$history" 吗？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _removeSearchHistoryItem(history);
+                              },
+                              child: const Text('删除'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -168,7 +364,18 @@ class _SearchPageState extends State<SearchPage> {
                       color: Colors.orange[50],
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Text(history),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(history),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.history,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
@@ -201,9 +408,20 @@ class _SearchPageState extends State<SearchPage> {
                     color: Colors.orange[100],
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text(
-                    hot,
-                    style: TextStyle(color: Colors.orange[800]),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.trending_up,
+                        size: 14,
+                        color: Colors.orange[800],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        hot,
+                        style: TextStyle(color: Colors.orange[800]),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -231,8 +449,8 @@ class _SearchPageState extends State<SearchPage> {
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: item['image'] is String
-                ? Image.asset(item['image'], fit: BoxFit.cover)  // 对于图片路径
-                : Icon(item['image'], size: 40),  // 调整图标大小
+                ? Image.asset(item['image'], fit: BoxFit.cover)
+                : Icon(item['image'], size: 40),
             title: Text(item['name']),
             subtitle: Row(
               children: [
@@ -241,14 +459,13 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
             onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MenuPage(restaurantName: item['name']),
-                  ),
-                );
-              },
-
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MenuPage(restaurantName: item['name']),
+                ),
+              );
+            },
           ),
         );
       },
