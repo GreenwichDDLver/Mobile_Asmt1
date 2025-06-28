@@ -9,6 +9,7 @@ import '../widgets/banner_header.dart';
 import '../widgets/food_item.dart';
 import '../widgets/bottom_cart.dart';
 import 'checkout_page.dart';
+import '../widgets/cart_panel.dart';
 
 class MenuPage extends StatefulWidget {
   final String restaurantName;
@@ -26,6 +27,7 @@ class _MenuPageState extends State<MenuPage> {
   RestaurantListModel? restaurant;
   bool isLoading = true;
   String? errorMessage;
+  bool _showCartPanel = false;
 
   @override
   void initState() {
@@ -289,6 +291,43 @@ class _MenuPageState extends State<MenuPage> {
               ),
             ],
           ),
+          Positioned(
+            bottom: 100,
+            right: 20,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _showCartPanel = true;
+                });
+              },
+              child: Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(Icons.shopping_cart, color: Colors.orange, size: 32),
+                ),
+              ),
+            ),
+          ),
+          if (_showCartPanel)
+            CartPanel(
+              onClose: () {
+                setState(() {
+                  _showCartPanel = false;
+                });
+              },
+            ),
         ],
       ),
     );
