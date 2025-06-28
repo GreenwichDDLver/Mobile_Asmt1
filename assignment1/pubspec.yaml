@@ -159,6 +159,7 @@ flutter:
     - assets/images/menu_food/Tom Yum.jpg
     - assets/images/menu_food/Tonkotsu Ramen.jpg
     - assets/images/menu_food/Tuna Sushi.jpg
+    - assets/videos/bannervideo.mp4
   #riderotw.jpg图片没有放，记得改
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
     viewportFraction: 0.85,
   );
   final List<String> bannerImages = [
-    "assets/images/banner1.png",
+    "assets/videos/bannervideo.mp4",
     "assets/images/banner2.png",
     "assets/images/banner3.png",
   ];
@@ -35,9 +35,13 @@ class _HomePageState extends State<HomePage> {
 
   bool _showCartPanel = false;
 
-  // Video player controller
+  // Video player controller for background
   late VideoPlayerController _videoController;
   bool _isVideoInitialized = false;
+
+  // Video player controller for banner video
+  late VideoPlayerController _bannerVideoController;
+  bool _isBannerVideoInitialized = false;
 
   // 当前选中的城市
   String _selectedCity = "KuaLumpur";
@@ -46,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _initializeVideoPlayer();
+    _initializeBannerVideoPlayer();
   }
 
   void _initializeVideoPlayer() async {
@@ -61,10 +66,24 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _initializeBannerVideoPlayer() async {
+    _bannerVideoController = VideoPlayerController.asset(
+      'assets/videos/bannervideo.mp4',
+    );
+    await _bannerVideoController.initialize();
+    _bannerVideoController.setLooping(true);
+    _bannerVideoController.setVolume(0.0); // 静音
+    _bannerVideoController.play();
+    setState(() {
+      _isBannerVideoInitialized = true;
+    });
+  }
+
   @override
   void dispose() {
     _bannerController.dispose();
     _videoController.dispose();
+    _bannerVideoController.dispose();
     super.dispose();
   }
 
@@ -430,13 +449,14 @@ class _HomePageState extends State<HomePage> {
   Widget _bannerSection() {
     final bannerDescriptions = [
       '''
-Enjoy a delightful pasta day! 🍝
+🎬 Watch Our Amazing Food Video! 🍽️
 
-✨ Special Offers:
-- Get a 50% discount on your second pasta dish.
-- Collect exclusive pasta coupons valid for this week only.
+✨ Experience the magic of our kitchen:
+- Watch our chefs create delicious dishes
+- See the fresh ingredients we use
+- Discover our cooking techniques
 
-📅 Limited-time offer. Grab it while it lasts!
+🎥 Click to watch the full video and get inspired!
 ''',
       '''
 🔥 Big Weekend Deal! 🛍️
@@ -502,12 +522,25 @@ Indulge in our cheesy pizza offer:
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        bannerImages[index],
-                        fit: BoxFit.cover,
-                        height: 160,
-                        width: double.infinity,
-                      ),
+                      child: index == 0 && _isBannerVideoInitialized
+                          ? SizedBox(
+                              height: 160,
+                              width: double.infinity,
+                              child: FittedBox(
+                                fit: BoxFit.cover,
+                                child: SizedBox(
+                                  width: _bannerVideoController.value.size.width,
+                                  height: _bannerVideoController.value.size.height,
+                                  child: VideoPlayer(_bannerVideoController),
+                                ),
+                              ),
+                            )
+                          : Image.asset(
+                              bannerImages[index],
+                              fit: BoxFit.cover,
+                              height: 160,
+                              width: double.infinity,
+                            ),
                     ),
                   ),
                 ),
