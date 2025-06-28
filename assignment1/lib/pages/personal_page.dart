@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'settings_page.dart';
 
 class PersonalHomePage extends StatefulWidget {
   const PersonalHomePage({super.key});
@@ -811,33 +812,9 @@ class _PersonalHomePageState extends State<PersonalHomePage> with TickerProvider
   }
 
   void _showSettingsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        title: const Text('Settings'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Notifications'),
-            SizedBox(height: 8),
-            Text('• Privacy & Security'),
-            SizedBox(height: 8),
-            Text('• Payment Methods'),
-            SizedBox(height: 8),
-            Text('• Account Settings'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsPage()),
     );
   }
 }

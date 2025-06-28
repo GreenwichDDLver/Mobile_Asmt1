@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../utils/account_manager.dart';
+import 'login_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -184,12 +187,6 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _showSnackBar('Opening Payment settings...'),
           ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Sign Out', style: TextStyle(color: Colors.red)),
-            onTap: () => _showSignOutDialog(),
-          ),
         ],
       ),
     );
@@ -241,31 +238,6 @@ class _SettingsPageState extends State<SettingsPage> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel', style: TextStyle(color: Colors.orange)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showSignOutDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out of your account?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showSnackBar('Signed out successfully');
-              },
-              child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
             ),
           ],
         );

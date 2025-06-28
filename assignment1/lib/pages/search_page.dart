@@ -650,14 +650,14 @@ class _SearchPageState extends State<SearchPage> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
               builder: (context) => MenuPage(restaurantName: restaurant.name),
-            ),
-          );
-        },
+                ),
+              );
+            },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),

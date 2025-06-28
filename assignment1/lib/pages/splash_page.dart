@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../main.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -34,17 +36,20 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     _controller.forward();
 
-    // 3秒后跳转到登录界面
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 800),
-          pageBuilder: (_, __, ___) => const LoginPage(),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        ),
-      );
+    // 自动登录逻辑
+    Future.delayed(const Duration(milliseconds: 2000), () async {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // 已登录，跳主页面
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationWrapper()),
+        );
+      } else {
+        // 未登录，跳登录页
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      }
     });
   }
 
