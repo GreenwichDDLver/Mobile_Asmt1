@@ -27,7 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _hasMinLength(String password) => password.length >= 8 && password.length <= 12;
   bool _hasUppercase(String password) => password.contains(RegExp(r'[A-Z]'));
   bool _hasLowercase(String password) => password.contains(RegExp(r'[a-z]'));
-  bool _hasSpecialChar(String password) => password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+  bool _hasSpecialChar(String password) => password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>-_/\|]'));
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {

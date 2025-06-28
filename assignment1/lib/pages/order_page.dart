@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:assignment1/pages/contact_page.dart';
 import 'package:assignment1/pages/checkout_page.dart';
 import 'dart:async';
 import 'dart:ui';
 
 class OrderPage extends StatefulWidget {
-  const OrderPage({Key? key}) : super(key: key);
+  const OrderPage({super.key});
 
   @override
   State<OrderPage> createState() => _OrderPageState();
@@ -15,6 +17,7 @@ class _OrderPageState extends State<OrderPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   Timer? _timer;
+  late MapController _mapController;
 
   // Sample rider locations (you would get these from your backend)
   final Map<String, Map<String, dynamic>> _riderLocations = {
@@ -22,21 +25,21 @@ class _OrderPageState extends State<OrderPage>
       'lat': 37.7749,
       'lng': -122.4194,
       'riderName': 'John Doe',
-      'riderImage': 'assets/images/riderotw.png', //riderotw.jpg图片没有放，记得改
+      'riderImage': 'assets/images/riderotw.png',
       'timeLeft': Duration(minutes: 25),
     },
     'ORD002': {
       'lat': 37.7849,
       'lng': -122.4094,
       'riderName': 'Jane Smith',
-      'riderImage': 'assets/images/riderotw.png', //riderotw.jpg图片没有放，记得改
+      'riderImage': 'assets/images/riderotw.png',
       'timeLeft': Duration(minutes: 15),
     },
     'ORD003': {
       'lat': 37.7649,
       'lng': -122.4294,
       'riderName': 'Mike Johnson',
-      'riderImage': 'assets/images/riderotw.png', //riderotw.jpg图片没有放，记得改
+      'riderImage': 'assets/images/riderotw.png',
       'timeLeft': Duration(minutes: 12),
     },
   };
@@ -110,10 +113,14 @@ class _OrderPageState extends State<OrderPage>
     },
   ];
 
+  // User's delivery location (this would typically come from user profile)
+  final LatLng _userLocation = const LatLng(37.7849, -122.4094);
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _mapController = MapController();
     _startLocationUpdates();
   }
 
@@ -157,7 +164,7 @@ class _OrderPageState extends State<OrderPage>
             top: 40,
             left: 16,
             right: 16,
-          ), // 顶部留出状态栏高度，左右间距
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -170,7 +177,6 @@ class _OrderPageState extends State<OrderPage>
           ),
         ),
       ),
-
       body: TabBarView(
         controller: _tabController,
         children: [_buildCurrentOrdersWithMap(), _buildOrderHistory()],
@@ -196,14 +202,358 @@ class _OrderPageState extends State<OrderPage>
     return SingleChildScrollView(
       child: Column(
         children: [
-          if (_outForDeliveryOrders.isNotEmpty)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: _buildDeliveryMap(),
-            ),
+          if (_outForDeliveryOrders.isNotEmpty) _buildInteractiveMap(),
           _buildCurrentOrders(),
         ],
       ),
+    );
+  }
+
+  Widget _buildInteractiveMap() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.shade200, width: 2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _userLocation,
+                initialZoom: 13.0,
+                minZoom: 10.0,
+                maxZoom: 18.0,
+                onTap: (tapPosition, point) {
+                  // Handle map tap if needed
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.app',
+                ),
+                PolylineLayer(
+                  polylines: _buildRoutePolylines(),
+                ),
+                MarkerLayer(
+                  markers: _buildMapMarkers(),
+                ),
+              ],
+            ),
+            // Zoom controls
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Column(
+                children: [
+                  FloatingActionButton(
+                    heroTag: "zoomIn",
+                    mini: true,
+                    onPressed: () {
+                      final zoom = _mapController.camera.zoom;
+                      if (zoom < 18.0) {
+                        _mapController.move(_mapController.camera.center, zoom + 1);
+                      }
+                    },
+                    child: const Icon(Icons.add),
+                  ),
+                  const SizedBox(height: 8),
+                  FloatingActionButton(
+                    heroTag: "zoomOut",
+                    mini: true,
+                    onPressed: () {
+                      final zoom = _mapController.camera.zoom;
+                      if (zoom > 10.0) {
+                        _mapController.move(_mapController.camera.center, zoom - 1);
+                      }
+                    },
+                    child: const Icon(Icons.remove),
+                  ),
+                ],
+              ),
+            ),
+            // Active deliveries info
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Active Deliveries',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ..._outForDeliveryOrders.map((order) {
+                      final riderInfo = _riderLocations[order['id']]!;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${order['shopName']}: ${riderInfo['timeLeft'].inMinutes}min',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+            ),
+            // Legend
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildLegendItem(Colors.blue, 'Shops'),
+                    const SizedBox(width: 8),
+                    _buildLegendItem(Colors.orange, 'Riders'),
+                    const SizedBox(width: 8),
+                    _buildLegendItem(Colors.green, 'You'),
+                  ],
+                ),
+              ),
+            ),
+            // Live tracking indicator
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'Live Tracking - ${_outForDeliveryOrders.length} Active',
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Marker> _buildMapMarkers() {
+    List<Marker> markers = [];
+
+    // Add user location marker
+    markers.add(
+      Marker(
+        point: _userLocation,
+        width: 40,
+        height: 40,
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.green, width: 3),
+            color: Colors.white,
+          ),
+          child: ClipOval(
+            child: Image.asset(
+              'assets/images/UserImage.jpg',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.green,
+                  child: const Icon(
+                    Icons.home,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Add shop markers
+    for (var order in _outForDeliveryOrders) {
+      final shopLocation = order['shopLocation'];
+      markers.add(
+        Marker(
+          point: LatLng(shopLocation['lat'], shopLocation['lng']),
+          width: 40,
+          height: 40,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.blue, width: 3),
+              color: Colors.white,
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                order['shopImage'] ?? 'assets/images/mcdmerchant.jpg',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.blue,
+                    child: const Icon(
+                      Icons.store,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Add rider markers
+    for (var order in _outForDeliveryOrders) {
+      final riderInfo = _riderLocations[order['id']]!;
+      markers.add(
+        Marker(
+          point: LatLng(riderInfo['lat'], riderInfo['lng']),
+          width: 60,
+          height: 80,
+          child: Column(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.orange, width: 2),
+                  color: Colors.white,
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    riderInfo['riderImage'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.orange,
+                        child: const Icon(
+                          Icons.motorcycle,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '${riderInfo['timeLeft'].inMinutes}min',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return markers;
+  }
+
+  List<Polyline> _buildRoutePolylines() {
+    List<Polyline> polylines = [];
+
+    for (var order in _outForDeliveryOrders) {
+      final riderInfo = _riderLocations[order['id']]!;
+      final shopLocation = order['shopLocation'];
+      
+      // Route from shop to rider
+      polylines.add(
+        Polyline(
+          points: [
+            LatLng(shopLocation['lat'], shopLocation['lng']),
+            LatLng(riderInfo['lat'], riderInfo['lng']),
+          ],
+          color: Colors.orange.withOpacity(0.5),
+          strokeWidth: 3.0,
+          pattern: StrokePattern.dashed(segments: [10, 5]),
+        ),
+      );
+
+      // Route from rider to user
+      polylines.add(
+        Polyline(
+          points: [
+            LatLng(riderInfo['lat'], riderInfo['lng']),
+            _userLocation,
+          ],
+          color: Colors.orange,
+          strokeWidth: 3.0,
+        ),
+      );
+    }
+
+    return polylines;
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 10)),
+      ],
     );
   }
 
@@ -305,7 +655,6 @@ class _OrderPageState extends State<OrderPage>
                   ],
                 ),
                 const SizedBox(height: 12),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -314,43 +663,33 @@ class _OrderPageState extends State<OrderPage>
                       onPressed: () {
                         showDialog(
                           context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: const Text(
-                                  'Do you want to call the rider?',
-                                ),
-                                content: const Text(
-                                  'Do you want to call the rider?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(); // 关闭对话框
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(); // 关闭对话框
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'You are calling the rider...',
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text('Call'),
-                                  ),
-                                ],
+                          builder: (context) => AlertDialog(
+                            title: const Text('Do you want to call the rider?'),
+                            content: const Text('Do you want to call the rider?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
                               ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('You are calling the rider...'),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Call'),
+                              ),
+                            ],
+                          ),
                         );
                       },
                       tooltip: 'Call Rider',
                     ),
-
                     Row(
                       children: [
                         OutlinedButton(
@@ -383,308 +722,6 @@ class _OrderPageState extends State<OrderPage>
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDeliveryMap() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      height: 300,
-      width: MediaQuery.of(context).size.width - 32,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade200, width: 2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/map.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey.shade200,
-                    child: CustomPaint(
-                      painter: MapPainter(),
-                      size: Size.infinite,
-                    ),
-                  );
-                },
-              ),
-            ),
-            _buildAllMapMarkers(),
-            ..._buildAllRoutes(),
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Active Deliveries',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    ..._outForDeliveryOrders.map((order) {
-                      final riderInfo = _riderLocations[order['id']]!;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${order['shopName']}: ${riderInfo['timeLeft'].inMinutes}min',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 8,
-              left: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildLegendItem(Colors.blue, 'Shops'),
-                    const SizedBox(width: 8),
-                    _buildLegendItem(Colors.orange, 'Riders'),
-                    const SizedBox(width: 8),
-                    _buildLegendItem(Colors.green, 'You'),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'Live Tracking - ${_outForDeliveryOrders.length} Active',
-                  style: const TextStyle(color: Colors.white, fontSize: 10),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAllMapMarkers() {
-    return Stack(
-      children: [
-        ..._outForDeliveryOrders.asMap().entries.map((entry) {
-          int index = entry.key;
-          Map<String, dynamic> order = entry.value;
-
-          double leftPosition = 200.0 + (index * 220.0);
-          double topPosition = 200.0 - (index * 60.0);
-
-          return Positioned(
-            left: leftPosition,
-            top: topPosition,
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.blue, width: 2),
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  order['shopImage'] ?? 'assets/images/mcdmerchant.jpg',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.blue,
-                      child: const Icon(
-                        Icons.store,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-        ..._outForDeliveryOrders.asMap().entries.map((entry) {
-          int index = entry.key;
-          Map<String, dynamic> order = entry.value;
-          final riderInfo = _riderLocations[order['id']]!;
-
-          double leftPosition = 160.0 + (index * 100.0);
-          double topPosition = 80.0 - (index * 60.0);
-
-          return Positioned(
-            left: leftPosition,
-            top: topPosition,
-            child: Column(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: const BoxDecoration(shape: BoxShape.circle),
-                  child: ClipOval(
-                    child: Image.asset(
-                      riderInfo['riderImage'],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(
-                          child: Icon(
-                            Icons.motorcycle,
-                            color: Colors.orange,
-                            size: 24,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'Time Left: ${riderInfo['timeLeft'].inMinutes}min',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-        Positioned(
-          left: 110,
-          top: 40,
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.green, width: 2),
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/UserImage.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.green,
-                    child: const Icon(
-                      Icons.home,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildAllRoutes() {
-    return _outForDeliveryOrders.asMap().entries.map((entry) {
-      int index = entry.key;
-
-      Offset startPoint = Offset(
-        198.0 + (index * 220.0),
-        198.0 - (index * 60.0),
-      );
-      Offset riderPoint = Offset(
-        170.0 + (index * 100.0),
-        120.0 - (index * 50.0),
-      );
-      Offset endPoint = const Offset(132, 67);
-
-      return Stack(
-        children: [
-          CustomPaint(
-            painter: RoutePainter(
-              start: startPoint,
-              end: riderPoint,
-              color: Colors.orange.withOpacity(0.5),
-            ),
-            size: Size.infinite,
-          ),
-          CustomPaint(
-            painter: RoutePainter(
-              start: riderPoint,
-              end: endPoint,
-              color: Colors.orange,
-            ),
-            size: Size.infinite,
-          ),
-        ],
-      );
-    }).toList();
-  }
-
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 10)),
-      ],
     );
   }
 
@@ -749,19 +786,17 @@ class _OrderPageState extends State<OrderPage>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            order['status'] == 'Completed'
-                                ? Colors.green[100]
-                                : Colors.red[100],
+                        color: order['status'] == 'Completed'
+                            ? Colors.green[100]
+                            : Colors.red[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         order['status'],
                         style: TextStyle(
-                          color:
-                              order['status'] == 'Completed'
-                                  ? Colors.green[800]
-                                  : Colors.red[800],
+                          color: order['status'] == 'Completed'
+                              ? Colors.green[800]
+                              : Colors.red[800],
                           fontSize: 12,
                         ),
                       ),
@@ -1073,4 +1108,12 @@ class RoutePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+extension on Path<LatLng> {
+  computeMetrics() {}
+  
+  void cubicTo(double dx, double dy, double dx2, double dy2, double dx3, double dy3) {}
+  
+  void moveTo(double dx, double dy) {}
 }
