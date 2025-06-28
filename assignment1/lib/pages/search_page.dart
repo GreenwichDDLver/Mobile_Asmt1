@@ -1,10 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../providers/restaurant_provider.dart';
+import '../models/restaurant.dart';
+import '../utils/search_suggestions.dart';
 import 'menu_page.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class SearchPage extends StatefulWidget {
-  final String? userId; // 添加用户ID参数，用于区分不同用户的搜索历史
+  final String? userId;
   
   const SearchPage({Key? key, this.userId}) : super(key: key);
 
@@ -17,21 +20,25 @@ class _SearchPageState extends State<SearchPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   List<String> _searchHistory = [];
-  List<String> _hotSearches = ['Suanyu House', 'Food by K', 'Hangzhou Flavor'];
-  List<Map<String, dynamic>> _searchResults = [];
+  List<String> _searchSuggestions = [];
   bool _isSearching = false;
   bool _isLoadingHistory = true;
+  String _currentQuery = '';
 
-  // 获取用户ID，如果没有提供则使用默认用户
+  // Get user ID
   String get _getUserId => widget.userId ?? 'default_user';
 
   @override
   void initState() {
     super.initState();
     _loadSearchHistory();
+    // Initialize Firebase data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RestaurantProvider>().initialize();
+    });
   }
 
-  // 从Firebase加载搜索历史
+  // Load search history from Firebase
   Future<void> _loadSearchHistory() async {
     try {
       setState(() {
@@ -50,11 +57,10 @@ class _SearchPageState extends State<SearchPage> {
         final historyList = List<String>.from(data['searches'] ?? []);
         
         setState(() {
-          _searchHistory = historyList.reversed.take(10).toList(); // 只保留最近10条记录
+          _searchHistory = historyList.reversed.take(10).toList();
           _isLoadingHistory = false;
         });
       } else {
-        // 如果没有历史记录，创建空的文档
         await _createEmptyHistoryDocument();
         setState(() {
           _searchHistory = [];
@@ -62,7 +68,7 @@ class _SearchPageState extends State<SearchPage> {
         });
       }
     } catch (e) {
-      print('加载搜索历史失败: $e');
+      print('Failed to load search history: $e');
       setState(() {
         _searchHistory = [];
         _isLoadingHistory = false;
@@ -70,7 +76,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  // 创建空的历史记录文档
+  // Create empty history document
   Future<void> _createEmptyHistoryDocument() async {
     try {
       await _firestore
@@ -84,27 +90,22 @@ class _SearchPageState extends State<SearchPage> {
         'updated_at': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('创建历史记录文档失败: $e');
+      print('Failed to create history document: $e');
     }
   }
 
-  // 保存搜索历史到Firebase
+  // Save search history to Firebase
   Future<void> _saveSearchToHistory(String query) async {
     if (query.trim().isEmpty) return;
 
     try {
-      // 先从本地历史中移除重复项
       _searchHistory.removeWhere((item) => item.toLowerCase() == query.toLowerCase());
-      
-      // 添加新的搜索词到开头
       _searchHistory.insert(0, query);
       
-      // 只保留最近20条记录
       if (_searchHistory.length > 20) {
         _searchHistory = _searchHistory.take(20).toList();
       }
 
-      // 保存到Firebase
       await _firestore
           .collection('users')
           .doc(_getUserId)
@@ -115,12 +116,10 @@ class _SearchPageState extends State<SearchPage> {
         'updated_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // 更新UI
       setState(() {});
       
     } catch (e) {
-      print('保存搜索历史失败: $e');
-      // 即使保存失败，也更新本地状态
+      print('Failed to save search history: $e');
       setState(() {
         _searchHistory.removeWhere((item) => item.toLowerCase() == query.toLowerCase());
         _searchHistory.insert(0, query);
@@ -131,7 +130,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  // 清空搜索历史
+  // Clear search history
   Future<void> _clearSearchHistory() async {
     try {
       await _firestore
@@ -148,26 +147,24 @@ class _SearchPageState extends State<SearchPage> {
         _searchHistory.clear();
       });
 
-      // 显示成功提示
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('搜索历史已清空'),
+          content: Text('Search history cleared'),
           duration: Duration(seconds: 2),
         ),
       );
     } catch (e) {
-      print('清空搜索历史失败: $e');
-      // 显示错误提示
+      print('Failed to clear search history: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('清空搜索历史失败，请重试'),
+          content: Text('Failed to clear search history, please try again'),
           duration: Duration(seconds: 2),
         ),
       );
     }
   }
 
-  // 删除单个搜索历史项
+  // Remove single search history item
   Future<void> _removeSearchHistoryItem(String query) async {
     try {
       _searchHistory.removeWhere((item) => item == query);
@@ -184,63 +181,61 @@ class _SearchPageState extends State<SearchPage> {
 
       setState(() {});
     } catch (e) {
-      print('删除搜索历史项失败: $e');
+      print('Failed to remove search history item: $e');
     }
   }
 
+  // Perform search
   void _performSearch(String query) {
-    if (query.isEmpty) return;
-
-    // 保存到搜索历史
-    _saveSearchToHistory(query);
+    if (query.trim().isEmpty) return;
 
     setState(() {
       _isSearching = true;
-      if (query == 'Hangzhou Flavor') {
-        _searchResults = [
-          {
-            'name': 'Hangzhou Flavor',
-            'image': 'assets/images/shop.jpg',
-            'rating': 4.5,
-          },
-          {
-            'name': 'Result Restaurant 2',
-            'image': Icons.fastfood,
-            'rating': 4.2,
-          },
-          {
-            'name': 'Result Restaurant 3',
-            'image': Icons.fastfood,
-            'rating': 4.8,
-          },
-        ];
-      } else {
-        _searchResults = [
-          {
-            'name': 'Result Restaurant 1',
-            'image': 'assets/images/shop.jpg',
-            'rating': 4.5,
-          },
-          {
-            'name': 'Result Restaurant 2',
-            'image': Icons.fastfood,
-            'rating': 4.2,
-          },
-          {
-            'name': 'Result Restaurant 3',
-            'image': Icons.fastfood,
-            'rating': 4.8,
-          },
-        ];
-      }
-      _isSearching = false;
+      _currentQuery = query.trim();
+      _searchSuggestions.clear();
     });
+
+    // Save to search history
+    _saveSearchToHistory(query);
+
+    // Use Provider for search
+    final provider = context.read<RestaurantProvider>();
+    provider.searchRestaurants(query);
+
+    // Delay to show loading state
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+        });
+      }
+    });
+  }
+
+  // Real-time search
+  void _onSearchChanged(String query) {
+    if (query.trim().isEmpty) {
+      setState(() {
+        _currentQuery = '';
+        _searchSuggestions.clear();
+      });
+      return;
+    }
+
+    setState(() {
+      _currentQuery = query.trim();
+      _searchSuggestions = SearchSuggestions.getSuggestions(query);
+    });
+
+    // Use Provider for real-time search
+    final provider = context.read<RestaurantProvider>();
+    provider.searchRestaurants(query);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.orange[100],
         elevation: 0,
@@ -250,7 +245,7 @@ class _SearchPageState extends State<SearchPage> {
             controller: _searchController,
             autofocus: true,
             decoration: InputDecoration(
-              hintText: 'Search products or stores',
+              hintText: 'Search restaurants or dishes...',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -258,7 +253,7 @@ class _SearchPageState extends State<SearchPage> {
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
-                          _searchResults.clear();
+                          _searchSuggestions.clear();
                         });
                       },
                     )
@@ -272,9 +267,7 @@ class _SearchPageState extends State<SearchPage> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             onSubmitted: _performSearch,
-            onChanged: (value) {
-              setState(() {});
-            },
+            onChanged: _onSearchChanged,
           ),
         ),
         actions: [
@@ -284,9 +277,104 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ],
       ),
-      body: _searchResults.isNotEmpty
-          ? _buildSearchResults()
-          : _buildSearchSuggestions(),
+      body: Consumer<RestaurantProvider>(
+        builder: (context, provider, child) {
+          // If there's a search query, show search results
+          if (_currentQuery.isNotEmpty) {
+            if (_isSearching) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Searching...'),
+                  ],
+                ),
+              );
+            }
+
+            final results = provider.filteredRestaurants;
+            
+            if (results.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.search_off,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No results found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Try different keywords',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Show search suggestions
+                    if (_searchSuggestions.isNotEmpty) ...[
+                      const Text(
+                        'Search suggestions:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: _searchSuggestions.map((suggestion) {
+                          return GestureDetector(
+                            onTap: () {
+                              _searchController.text = suggestion;
+                              _performSearch(suggestion);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange[100],
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                suggestion,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.orange[800],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }
+
+            return _buildSearchResults(results);
+          }
+
+          // Otherwise show search suggestions
+          return _buildSearchSuggestions();
+        },
+      ),
     );
   }
 
@@ -331,24 +419,23 @@ class _SearchPageState extends State<SearchPage> {
                     _performSearch(history);
                   },
                   onLongPress: () {
-                    // 长按删除单个历史记录
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: const Text('删除搜索记录'),
-                          content: Text('确定要删除 "$history" 吗？'),
+                          title: const Text('Delete Search Record'),
+                          content: Text('Are you sure you want to delete "$history"?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('取消'),
+                              child: const Text('Cancel'),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 _removeSearchHistoryItem(history);
                               },
-                              child: const Text('删除'),
+                              child: const Text('Delete'),
                             ),
                           ],
                         );
@@ -393,7 +480,7 @@ class _SearchPageState extends State<SearchPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _hotSearches.map((hot) {
+            children: SearchSuggestions.hotSearches.map((hot) {
               return GestureDetector(
                 onTap: () {
                   _searchController.text = hot;
@@ -427,48 +514,257 @@ class _SearchPageState extends State<SearchPage> {
               );
             }).toList(),
           ),
+          const SizedBox(height: 24),
+          const Text(
+            'Search Tips',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: SearchSuggestions.getSearchTips().map((tip) => 
+                _buildSearchTip(tip['icon']!, tip['title']!, tip['description']!)
+              ).toList(),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Example Searches',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: SearchSuggestions.getExampleSearches().map((example) {
+              return GestureDetector(
+                onTap: () {
+                  _searchController.text = example;
+                  _performSearch(example);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blue[200]!),
+                  ),
+                  child: Text(
+                    example,
+                    style: TextStyle(
+                      color: Colors.blue[700],
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchResults() {
-    if (_isSearching) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final item = _searchResults[index];
-        return Card(
-          color: Colors.orange[50],
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: item['image'] is String
-                ? Image.asset(item['image'], fit: BoxFit.cover)
-                : Icon(item['image'], size: 40),
-            title: Text(item['name']),
-            subtitle: Row(
+  Widget _buildSearchTip(String icon, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.star, color: Colors.orange, size: 16),
-                Text(' ${item['rating']}'),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
               ],
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MenuPage(restaurantName: item['name']),
-                ),
-              );
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResults(List<Restaurant> results) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Found ${results.length} results',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: results.length,
+            itemBuilder: (context, index) {
+              final restaurant = results[index];
+              return _buildRestaurantCard(restaurant);
             },
           ),
-        );
-      },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRestaurantCard(Restaurant restaurant) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MenuPage(restaurantName: restaurant.name),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Restaurant image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  restaurant.iconPath,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Restaurant information
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      restaurant.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow[600],
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          restaurant.score,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          restaurant.sales,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          restaurant.duration,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Icon(
+                          Icons.delivery_dining,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          restaurant.fee,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Menu items: ${restaurant.menuItems.length}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Arrow icon
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey[400],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

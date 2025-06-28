@@ -7,8 +7,10 @@ import 'package:assignment1/pages/message_page.dart';
 import 'package:assignment1/pages/splash_page.dart';
 import 'package:assignment1/pages/categories_page.dart';
 import 'package:assignment1/models/cart_model.dart';
+import 'package:assignment1/providers/restaurant_provider.dart';
 import 'pages/login_page.dart';
 import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -17,7 +19,10 @@ void main() async {
   
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => CartModel())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartModel()),
+        ChangeNotifierProvider(create: (_) => RestaurantProvider()),
+      ],
       child: const MyApp(),
     ),
   );

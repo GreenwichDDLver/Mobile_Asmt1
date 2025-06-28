@@ -76,7 +76,6 @@ class NavDrawer extends StatelessWidget {
               Icons.help,
             ),
           ),
-
         ],
       ),
     );
