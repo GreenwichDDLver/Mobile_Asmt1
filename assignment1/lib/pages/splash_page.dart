@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../main.dart';
+import '../utils/firebase_test.dart';
+import '../services/order_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -14,6 +16,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  String _loadingText = '正在启动...';
 
   @override
   void initState() {
@@ -36,21 +39,66 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     _controller.forward();
 
-    // 自动登录逻辑
-    Future.delayed(const Duration(milliseconds: 2000), () async {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // 已登录，跳主页面
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigationWrapper()),
-        );
-      } else {
-        // 未登录，跳登录页
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LoginPage()),
-        );
+    // 初始化应用
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      // 测试Firebase连接
+      setState(() {
+        _loadingText = '正在连接数据库...';
+      });
+
+      bool isConnected = await FirebaseTest.testConnection();
+      if (!isConnected) {
+        print('Firebase连接失败，但继续启动应用');
       }
-    });
+
+      // 初始化订单数据
+      setState(() {
+        _loadingText = '正在初始化订单数据...';
+      });
+
+      await OrderService.initializeSampleOrders();
+
+      setState(() {
+        _loadingText = '启动完成';
+      });
+
+      // 延迟2秒后跳转
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      if (mounted) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          // 已登录，跳主页面
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainNavigationWrapper()),
+          );
+        } else {
+          // 未登录，跳登录页
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+          );
+        }
+      }
+    } catch (e) {
+      print('应用初始化失败: $e');
+      // 即使初始化失败也继续启动应用
+      if (mounted) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainNavigationWrapper()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -87,9 +135,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             const SizedBox(height: 20),
             FadeTransition(
               opacity: _fadeAnimation,
-              child: const Text(
-                'Loading...',
-                style: TextStyle(fontSize: 18, color: Colors.deepOrange),
+              child: Text(
+                _loadingText,
+                style: const TextStyle(fontSize: 18, color: Colors.deepOrange),
               ),
             ),
           ],

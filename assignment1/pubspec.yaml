@@ -112,19 +112,24 @@ flutter:
     - assets/images/mcdmerchant.jpg
     - assets/images/mixuemerchant.jpg
     - assets/images/noodlemerchant.jpg
+    - assets/images/hangzhouflavourmerchant.jpg
+    - assets/images/localrestaurantmerchant.jpg
+    - assets/images/defaultmerchant.jpg
     - assets/images/UserImage.jpg
-    - assets/videos/background.mp4
-    - assets/images/map.png
     - assets/images/logo-4fingers.jpg
     - assets/images/pattern1.png
     - assets/images/pattern2.png
     - assets/images/pattern3.png
     - assets/images/pattern4.png
-    - assets/images/riderotw.jpg
+    - assets/images/riderotw.png
     - assets/images/personBackground.jpg
     - assets/images/placeholder.png
     - assets/data/restaurants_menu_data.json
+    - assets/videos/background.mp4
   #以下是fooditem图片
+    - assets/images/menu_food/Ice Cream.jpg
+    - assets/images/menu_food/Bubble Tea.jpeg
+    - assets/images/menu_food/Snack.jpeg
     - assets/images/menu_food/Apple Pie.jpg
     - assets/images/menu_food/Beef Hotpot.jpg
     - assets/images/menu_food/big.jpg
@@ -160,7 +165,6 @@ flutter:
     - assets/images/menu_food/Tonkotsu Ramen.jpg
     - assets/images/menu_food/Tuna Sushi.jpg
     - assets/videos/bannervideo.mp4
-  #riderotw.jpg图片没有放，记得改
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

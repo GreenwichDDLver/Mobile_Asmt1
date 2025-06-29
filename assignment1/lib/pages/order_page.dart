@@ -3,6 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:assignment1/pages/contact_page.dart';
 import 'package:assignment1/pages/checkout_page.dart';
+import 'package:assignment1/services/order_service.dart';
+import 'package:assignment1/models/order.dart';
 import 'dart:async';
 import 'dart:ui';
 
@@ -19,101 +21,10 @@ class _OrderPageState extends State<OrderPage>
   Timer? _timer;
   late MapController _mapController;
 
-  // Sample rider locations (you would get these from your backend)
-  final Map<String, Map<String, dynamic>> _riderLocations = {
-    'ORD001': {
-      'lat': 37.7749,
-      'lng': -122.4194,
-      'riderName': 'John Doe',
-      'riderImage': 'assets/images/riderotw.png',
-      'timeLeft': Duration(minutes: 25),
-    },
-    'ORD002': {
-      'lat': 37.7849,
-      'lng': -122.4094,
-      'riderName': 'Jane Smith',
-      'riderImage': 'assets/images/riderotw.png',
-      'timeLeft': Duration(minutes: 15),
-    },
-    'ORD003': {
-      'lat': 37.7649,
-      'lng': -122.4294,
-      'riderName': 'Mike Johnson',
-      'riderImage': 'assets/images/riderotw.png',
-      'timeLeft': Duration(minutes: 12),
-    },
-  };
+  // 骑手位置信息
+  final Map<String, Map<String, dynamic>> _riderLocations = {};
 
-  final List<Map<String, dynamic>> _currentOrders = [
-    {
-      'id': 'ORD001',
-      'shopName': 'McDonald\'s',
-      'shopImage': 'assets/images/mcdmerchant.jpg',
-      'items': ['Big Mac', 'Fries'],
-      'totalPrice': 45.0,
-      'status': 'Out for Delivery',
-      'orderTime': '2024-01-20 12:30',
-      'estimatedTime': '35 minutes',
-      'shopLocation': {'lat': 37.7649, 'lng': -122.4294},
-      'deliveryLocation': {'lat': 37.7849, 'lng': -122.4094},
-    },
-    {
-      'id': 'ORD002',
-      'shopName': 'Mixue',
-      'shopImage': 'assets/images/mixuemerchant.jpg',
-      'items': ['Ice Cream', 'Bubble Tea', 'Snack'],
-      'totalPrice': 32.0,
-      'status': 'Out for Delivery',
-      'orderTime': '2024-01-20 11:45',
-      'estimatedTime': '20 minutes',
-      'shopLocation': {'lat': 37.7549, 'lng': -122.4394},
-      'deliveryLocation': {'lat': 37.7849, 'lng': -122.4094},
-    },
-    {
-      'id': 'ORD003',
-      'shopName': 'Local Restaurant',
-      'shopImage': 'assets/images/mcdmerchant.jpg',
-      'items': ['Pasta', 'Salad'],
-      'totalPrice': 28.0,
-      'status': 'Preparing',
-      'orderTime': '2024-01-20 13:15',
-      'estimatedTime': '25 minutes',
-      'shopLocation': {'lat': 37.7449, 'lng': -122.4494},
-      'deliveryLocation': {'lat': 37.7849, 'lng': -122.4094},
-    },
-  ];
-
-  final List<Map<String, dynamic>> _orderHistory = [
-    {
-      'id': 'ORD004',
-      'shopName': 'Shop C',
-      'items': ['Food5', 'Food6'],
-      'totalPrice': 28.0,
-      'status': 'Completed',
-      'orderTime': '2024-01-19 18:30',
-      'canReview': true,
-    },
-    {
-      'id': 'ORD005',
-      'shopName': 'Shop D',
-      'items': ['Food7', 'Food8'],
-      'totalPrice': 55.0,
-      'status': 'Completed',
-      'orderTime': '2024-01-18 19:15',
-      'canReview': false,
-    },
-    {
-      'id': 'ORD006',
-      'shopName': 'Shop E',
-      'items': ['Food9', 'Food10'],
-      'totalPrice': 22.0,
-      'status': 'Cancelled',
-      'orderTime': '2024-01-17 12:00',
-      'canReview': false,
-    },
-  ];
-
-  // User's delivery location (this would typically come from user profile)
+  // 用户配送位置
   final LatLng _userLocation = const LatLng(37.7849, -122.4094);
 
   @override
@@ -122,6 +33,16 @@ class _OrderPageState extends State<OrderPage>
     _tabController = TabController(length: 2, vsync: this);
     _mapController = MapController();
     _startLocationUpdates();
+    _initializeSampleOrders();
+  }
+
+  // 初始化示例订单数据
+  void _initializeSampleOrders() async {
+    try {
+      await OrderService.initializeSampleOrders();
+    } catch (e) {
+      print('初始化示例订单失败: $e');
+    }
   }
 
   void _startLocationUpdates() {
@@ -142,10 +63,11 @@ class _OrderPageState extends State<OrderPage>
     });
   }
 
-  List<Map<String, dynamic>> get _outForDeliveryOrders {
-    return _currentOrders
-        .where((order) => order['status'] == 'Out for Delivery')
-        .toList();
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -154,17 +76,13 @@ class _OrderPageState extends State<OrderPage>
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: Colors.orange[100],
-        title: const Text('My Orders'),
+        title: const Text('我的订单'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [Tab(text: 'Current Orders'), Tab(text: 'Order History')],
+          tabs: const [Tab(text: '当前订单'), Tab(text: '订单历史')],
         ),
         flexibleSpace: Container(
-          padding: const EdgeInsets.only(
-            top: 40,
-            left: 16,
-            right: 16,
-          ),
+          padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -199,17 +117,54 @@ class _OrderPageState extends State<OrderPage>
   }
 
   Widget _buildCurrentOrdersWithMap() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          if (_outForDeliveryOrders.isNotEmpty) _buildInteractiveMap(),
-          _buildCurrentOrders(),
-        ],
-      ),
+    return StreamBuilder<List<OrderModel>>(
+      stream: OrderService.getCurrentOrders(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('加载订单失败: ${snapshot.error}'));
+        }
+
+        List<OrderModel> currentOrders = snapshot.data ?? [];
+        List<OrderModel> outForDeliveryOrders =
+            currentOrders
+                .where((order) => order.status == 'Out for Delivery')
+                .toList();
+
+        // 更新骑手位置信息
+        _updateRiderLocations(outForDeliveryOrders);
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              if (outForDeliveryOrders.isNotEmpty)
+                _buildInteractiveMap(outForDeliveryOrders),
+              _buildCurrentOrders(currentOrders),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildInteractiveMap() {
+  void _updateRiderLocations(List<OrderModel> outForDeliveryOrders) {
+    for (var order in outForDeliveryOrders) {
+      if (!_riderLocations.containsKey(order.id)) {
+        _riderLocations[order.id] = {
+          'lat': order.shopLocation['lat'] ?? 37.7649,
+          'lng': order.shopLocation['lng'] ?? -122.4294,
+          'riderName': order.riderName ?? 'Unknown Rider',
+          'riderImage': order.riderImage ?? 'assets/images/riderotw.png',
+          'timeLeft': order.timeLeft ?? Duration(minutes: 25),
+        };
+      }
+    }
+  }
+
+  Widget _buildInteractiveMap(List<OrderModel> outForDeliveryOrders) {
     return Container(
       margin: const EdgeInsets.all(16),
       height: 300,
@@ -238,11 +193,9 @@ class _OrderPageState extends State<OrderPage>
                   userAgentPackageName: 'com.example.app',
                 ),
                 PolylineLayer(
-                  polylines: _buildRoutePolylines(),
+                  polylines: _buildRoutePolylines(outForDeliveryOrders),
                 ),
-                MarkerLayer(
-                  markers: _buildMapMarkers(),
-                ),
+                MarkerLayer(markers: _buildMapMarkers(outForDeliveryOrders)),
               ],
             ),
             // Zoom controls
@@ -257,7 +210,10 @@ class _OrderPageState extends State<OrderPage>
                     onPressed: () {
                       final zoom = _mapController.camera.zoom;
                       if (zoom < 18.0) {
-                        _mapController.move(_mapController.camera.center, zoom + 1);
+                        _mapController.move(
+                          _mapController.camera.center,
+                          zoom + 1,
+                        );
                       }
                     },
                     child: const Icon(Icons.add),
@@ -269,7 +225,10 @@ class _OrderPageState extends State<OrderPage>
                     onPressed: () {
                       final zoom = _mapController.camera.zoom;
                       if (zoom > 10.0) {
-                        _mapController.move(_mapController.camera.center, zoom - 1);
+                        _mapController.move(
+                          _mapController.camera.center,
+                          zoom - 1,
+                        );
                       }
                     },
                     child: const Icon(Icons.remove),
@@ -299,22 +258,22 @@ class _OrderPageState extends State<OrderPage>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Active Deliveries',
+                      '活跃配送',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    ..._outForDeliveryOrders.map((order) {
-                      final riderInfo = _riderLocations[order['id']]!;
+                    ...outForDeliveryOrders.map((order) {
+                      final riderInfo = _riderLocations[order.id]!;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${order['shopName']}: ${riderInfo['timeLeft'].inMinutes}min',
+                              '${order.shopName}: ${riderInfo['timeLeft'].inMinutes}分钟',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.orange,
@@ -342,11 +301,11 @@ class _OrderPageState extends State<OrderPage>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildLegendItem(Colors.blue, 'Shops'),
+                    _buildLegendItem(Colors.blue, '餐厅'),
                     const SizedBox(width: 8),
-                    _buildLegendItem(Colors.orange, 'Riders'),
+                    _buildLegendItem(Colors.orange, '骑手'),
                     const SizedBox(width: 8),
-                    _buildLegendItem(Colors.green, 'You'),
+                    _buildLegendItem(Colors.green, '您'),
                   ],
                 ),
               ),
@@ -362,7 +321,7 @@ class _OrderPageState extends State<OrderPage>
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  'Live Tracking - ${_outForDeliveryOrders.length} Active',
+                  '实时追踪 - ${outForDeliveryOrders.length} 个活跃订单',
                   style: const TextStyle(color: Colors.white, fontSize: 10),
                 ),
               ),
@@ -373,7 +332,7 @@ class _OrderPageState extends State<OrderPage>
     );
   }
 
-  List<Marker> _buildMapMarkers() {
+  List<Marker> _buildMapMarkers(List<OrderModel> outForDeliveryOrders) {
     List<Marker> markers = [];
 
     // Add user location marker
@@ -395,11 +354,7 @@ class _OrderPageState extends State<OrderPage>
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: Colors.green,
-                  child: const Icon(
-                    Icons.home,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.home, color: Colors.white, size: 20),
                 );
               },
             ),
@@ -409,134 +364,88 @@ class _OrderPageState extends State<OrderPage>
     );
 
     // Add shop markers
-    for (var order in _outForDeliveryOrders) {
-      final shopLocation = order['shopLocation'];
+    for (var order in outForDeliveryOrders) {
+      final shopLat = order.shopLocation['lat'] ?? 37.7649;
+      final shopLng = order.shopLocation['lng'] ?? -122.4294;
+
       markers.add(
         Marker(
-          point: LatLng(shopLocation['lat'], shopLocation['lng']),
-          width: 40,
-          height: 40,
+          point: LatLng(shopLat, shopLng),
+          width: 30,
+          height: 30,
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue, width: 3),
+              border: Border.all(color: Colors.blue, width: 2),
               color: Colors.white,
             ),
-            child: ClipOval(
-              child: Image.asset(
-                order['shopImage'] ?? 'assets/images/mcdmerchant.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.blue,
-                    child: const Icon(
-                      Icons.store,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  );
-                },
-              ),
-            ),
+            child: const Icon(Icons.store, color: Colors.blue, size: 16),
           ),
         ),
       );
     }
 
     // Add rider markers
-    for (var order in _outForDeliveryOrders) {
-      final riderInfo = _riderLocations[order['id']]!;
-      markers.add(
-        Marker(
-          point: LatLng(riderInfo['lat'], riderInfo['lng']),
-          width: 60,
-          height: 80,
-          child: Column(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.orange, width: 2),
-                  color: Colors.white,
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    riderInfo['riderImage'],
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.orange,
-                        child: const Icon(
-                          Icons.motorcycle,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      );
-                    },
-                  ),
+    for (var order in outForDeliveryOrders) {
+      if (_riderLocations.containsKey(order.id)) {
+        final riderInfo = _riderLocations[order.id]!;
+        markers.add(
+          Marker(
+            point: LatLng(riderInfo['lat'], riderInfo['lng']),
+            width: 35,
+            height: 35,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.orange, width: 2),
+                color: Colors.white,
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  riderInfo['riderImage'],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.orange,
+                      child: const Icon(
+                        Icons.delivery_dining,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${riderInfo['timeLeft'].inMinutes}min',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     return markers;
   }
 
-  List<Polyline> _buildRoutePolylines() {
+  List<Polyline> _buildRoutePolylines(List<OrderModel> outForDeliveryOrders) {
     List<Polyline> polylines = [];
 
-    for (var order in _outForDeliveryOrders) {
-      final riderInfo = _riderLocations[order['id']]!;
-      final shopLocation = order['shopLocation'];
-      
-      // Route from shop to rider
-      polylines.add(
-        Polyline(
-          points: [
-            LatLng(shopLocation['lat'], shopLocation['lng']),
-            LatLng(riderInfo['lat'], riderInfo['lng']),
-          ],
-          color: Colors.orange.withOpacity(0.5),
-          strokeWidth: 3.0,
-          pattern: StrokePattern.dashed(segments: [10, 5]),
-        ),
-      );
+    for (var order in outForDeliveryOrders) {
+      if (_riderLocations.containsKey(order.id)) {
+        final riderInfo = _riderLocations[order.id]!;
+        final shopLat = order.shopLocation['lat'] ?? 37.7649;
+        final shopLng = order.shopLocation['lng'] ?? -122.4294;
 
-      // Route from rider to user
-      polylines.add(
-        Polyline(
-          points: [
-            LatLng(riderInfo['lat'], riderInfo['lng']),
-            _userLocation,
-          ],
-          color: Colors.orange,
-          strokeWidth: 3.0,
-        ),
-      );
+        polylines.add(
+          Polyline(
+            points: [
+              LatLng(shopLat, shopLng),
+              LatLng(riderInfo['lat'], riderInfo['lng']),
+              _userLocation,
+            ],
+            strokeWidth: 3,
+            color: Colors.orange.withOpacity(0.7),
+          ),
+        );
+      }
     }
 
     return polylines;
@@ -547,8 +456,8 @@ class _OrderPageState extends State<OrderPage>
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
@@ -557,19 +466,21 @@ class _OrderPageState extends State<OrderPage>
     );
   }
 
-  Widget _buildCurrentOrders() {
-    if (_currentOrders.isEmpty) {
+  Widget _buildCurrentOrders(List<OrderModel> currentOrders) {
+    if (currentOrders.isEmpty) {
       return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.receipt_long, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No current orders',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Column(
+            children: [
+              Icon(Icons.receipt_long, size: 64, color: Colors.grey),
+              SizedBox(height: 16),
+              Text(
+                '暂无当前订单',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -577,421 +488,486 @@ class _OrderPageState extends State<OrderPage>
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
-      itemCount: _currentOrders.length,
+      itemCount: currentOrders.length,
       itemBuilder: (context, index) {
-        final order = _currentOrders[index];
-        return Card(
-          color: const Color.fromARGB(255, 255, 249, 226),
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      order['shopName'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(order['status']),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        order['status'],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  order['items'].join(', '),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Order ID: ${order['id']}'),
-                    Text(
-                      '\$${order['totalPrice']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Order Time: ${order['orderTime']}'),
-                    if (_riderLocations.containsKey(order['id']))
-                      Text(
-                        'Time Left: ${_riderLocations[order['id']]!['timeLeft'].inMinutes} min',
-                        style: const TextStyle(
-                          color: Colors.orange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.phone, color: Colors.green),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Do you want to call the rider?'),
-                            content: const Text('Do you want to call the rider?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('You are calling the rider...'),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Call'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      tooltip: 'Call Rider',
-                    ),
-                    Row(
-                      children: [
-                        OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFFF8C00),
-                            side: const BorderSide(color: Color(0xFFFF8C00)),
-                          ),
-                          onPressed: () {
-                            _showOrderDetail(order);
-                          },
-                          child: const Text('View Details'),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFA500),
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: () {
-                            _showContactOptions(order);
-                          },
-                          child: const Text('Contact'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+        final order = currentOrders[index];
+        return _buildOrderCard(order);
+      },
+    );
+  }
+
+  Widget _buildOrderHistory() {
+    return StreamBuilder<List<OrderModel>>(
+      stream: OrderService.getOrderHistory(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('加载订单历史失败: ${snapshot.error}'));
+        }
+
+        List<OrderModel> orderHistory = snapshot.data ?? [];
+
+        if (orderHistory.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Column(
+                children: [
+                  Icon(Icons.history, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    '暂无订单历史',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
+              ),
             ),
-          ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: orderHistory.length,
+          itemBuilder: (context, index) {
+            final order = orderHistory[index];
+            return _buildOrderCard(order);
+          },
         );
       },
     );
   }
 
+  Widget _buildOrderCard(OrderModel order) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // 订单头部
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange[50],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    order.shopImage,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 50,
+                        height: 50,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.store, color: Colors.grey),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.shopName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '订单号: ${order.id}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        order.orderTime,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(order.status),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _getStatusText(order.status),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                // 历史订单显示删除按钮
+                if (order.status == 'Completed' || order.status == 'Cancelled')
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: '删除订单',
+                    onPressed: () => _showDeleteOrderDialog(order),
+                  ),
+              ],
+            ),
+          ),
+
+          // 订单项目
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                ...order.items
+                    .map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.asset(
+                                item.imagePath,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 40,
+                                    height: 40,
+                                    color: Colors.grey[200],
+                                    child: const Icon(
+                                      Icons.fastfood,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '数量: ${item.quantity}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+
+                const Divider(),
+                // 费用明细
+                if (order.subtotal != null)
+                  _buildOrderPriceRow('商品小计', order.subtotal!),
+                if (order.tax != null) _buildOrderPriceRow('税费', order.tax!),
+                if (order.deliveryFee != null)
+                  _buildOrderPriceRow('配送费', order.deliveryFee!),
+                if (order.discount != null && order.discount != 0)
+                  _buildOrderPriceRow(
+                    '优惠',
+                    -order.discount!,
+                    color: Colors.green,
+                  ),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '总计:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '\$${(order.finalTotal ?? order.totalPrice).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (order.status == 'Out for Delivery' &&
+                    order.timeLeft != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          color: Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '预计 ${order.timeLeft!.inMinutes} 分钟送达',
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // 订单操作按钮
+          if (order.status == 'Completed')
+            Container(
+              padding: const EdgeInsets.all(16),
+              child:
+                  order.reviewRating == null
+                      ? Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _showReviewDialog(order);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('评价订单'),
+                            ),
+                          ),
+                        ],
+                      )
+                      : _buildOrderReview(order),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteOrderDialog(OrderModel order) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('删除订单'),
+            content: const Text('是否永久删除此订单？此操作不可恢复。'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await OrderService.deleteOrder(order.id);
+                  setState(() {}); // 刷新页面
+                },
+                child: const Text('删除', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showReviewDialog(OrderModel order) {
+    int _selectedRating = 5;
+    TextEditingController _reviewController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('评价订单'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    icon: Icon(
+                      index < _selectedRating ? Icons.star : Icons.star_border,
+                      color: Colors.orange,
+                    ),
+                    onPressed: () {
+                      _selectedRating = index + 1;
+                      (context as Element).markNeedsBuild();
+                    },
+                  );
+                }),
+              ),
+              TextField(
+                controller: _reviewController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: '评价内容',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await OrderService.updateOrderReview(
+                  order.id,
+                  _selectedRating,
+                  _reviewController.text.trim(),
+                );
+                setState(() {});
+              },
+              child: const Text('提交', style: TextStyle(color: Colors.orange)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildOrderReview(OrderModel order) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: List.generate(5, (index) {
+              return Icon(
+                index < (order.reviewRating ?? 0)
+                    ? Icons.star
+                    : Icons.star_border,
+                color: Colors.orange,
+                size: 18,
+              );
+            }),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (order.reviewText != null && order.reviewText!.isNotEmpty)
+                  Text(order.reviewText!, style: const TextStyle(fontSize: 14)),
+                if (order.reviewTime != null)
+                  Text(
+                    order.reviewTime!,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'preparing':
+    switch (status) {
+      case 'Preparing':
         return Colors.blue;
-      case 'out for delivery':
+      case 'Out for Delivery':
         return Colors.orange;
-      case 'delivered':
+      case 'Completed':
         return Colors.green;
-      case 'cancelled':
+      case 'Cancelled':
         return Colors.red;
       default:
         return Colors.grey;
     }
   }
 
-  Widget _buildOrderHistory() {
-    if (_orderHistory.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.history, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No order history',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        ),
-      );
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'Preparing':
+        return '准备中';
+      case 'Out for Delivery':
+        return '配送中';
+      case 'Completed':
+        return '已完成';
+      case 'Cancelled':
+        return '已取消';
+      default:
+        return status;
     }
+  }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _orderHistory.length,
-      itemBuilder: (context, index) {
-        final order = _orderHistory[index];
-        return Card(
-          color: const Color.fromARGB(255, 255, 249, 226),
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      order['shopName'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: order['status'] == 'Completed'
-                            ? Colors.green[100]
-                            : Colors.red[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        order['status'],
-                        style: TextStyle(
-                          color: order['status'] == 'Completed'
-                              ? Colors.green[800]
-                              : Colors.red[800],
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  order['items'].join(', '),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Order ID: ${order['id']}'),
-                    Text(
-                      '\$${order['totalPrice']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text('Order Time: ${order['orderTime']}'),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFFF8C00),
-                        side: const BorderSide(color: Color(0xFFFF8C00)),
-                      ),
-                      onPressed: () {
-                        _showOrderDetail(order);
-                      },
-                      child: const Text('View Details'),
-                    ),
-                    const SizedBox(width: 8),
-                    if (order['canReview'])
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFA500),
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          _writeReview(order);
-                        },
-                        child: const Text('Write Review'),
-                      )
-                    else
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFA500),
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          _reorderFood(order);
-                        },
-                        child: const Text('Order Again'),
-                      ),
-                  ],
-                ),
-              ],
+  Widget _buildOrderPriceRow(String label, double amount, {Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 14)),
+          Text(
+            '\$${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 14,
+              color: color ?? Colors.black,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        );
-      },
-    );
-  }
-
-  void _showOrderDetail(Map<String, dynamic> order) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Order Details - ${order['id']}'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Shop: ${order['shopName']}'),
-                const SizedBox(height: 8),
-                Text('Items: ${order['items'].join(', ')}'),
-                const SizedBox(height: 8),
-                Text('Total: \$${order['totalPrice']}'),
-                const SizedBox(height: 8),
-                Text('Order Time: ${order['orderTime']}'),
-                if (_riderLocations.containsKey(order['id'])) ...[
-                  const SizedBox(height: 8),
-                  Text('Rider: ${_riderLocations[order['id']]!['riderName']}'),
-                  Text(
-                    'Time Left: ${_riderLocations[order['id']]!['timeLeft'].inMinutes} minutes',
-                  ),
-                ],
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _showContactOptions(Map<String, dynamic> order) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Contact Options'),
-            content: const Text('Who do you want to contact?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _navigateToContactPage(order, contactType: 'rider');
-                },
-                child: const Text('Contact Rider'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _navigateToContactPage(order, contactType: 'merchant');
-                },
-                child: const Text('Contact Merchant'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _navigateToContactPage(
-  Map<String, dynamic> order, {
-  required String contactType,
-}) {
-  String contactName;
-  String contactAvatar;
-  
-  if (contactType == 'rider') {
-    // Check if rider information exists for this order
-    final riderInfo = _riderLocations[order['id']];
-    if (riderInfo != null) {
-      contactName = riderInfo['riderName'] ?? 'Unknown Rider';
-      contactAvatar = 'assets/images/rider1.jpg';
-    } else {
-      // Fallback if no rider info is available
-      contactName = 'Delivery Rider';
-      contactAvatar = 'assets/images/rider1.jpg';
-    }
-  } else {
-    contactName = order['shopName'] ?? 'Unknown Shop';
-    contactAvatar = order['shopImage'] ?? 'assets/images/mcdmerchant.jpg';
-  }
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ContactPage(
-        contactName: contactName,
-        contactAvatar: contactAvatar,
+        ],
       ),
-    ),
-  );
-}
-
-  void _contactDelivery(Map<String, dynamic> order) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Contacting rider for order ${order['id']}')),
     );
-  }
-
-  void _writeReview(Map<String, dynamic> order) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Writing review for order ${order['id']}')),
-    );
-  }
-
-  void _reorderFood(Map<String, dynamic> order) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => CheckoutPage()),
-    );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _timer?.cancel();
-    super.dispose();
   }
 }
 
@@ -1112,8 +1088,15 @@ class RoutePainter extends CustomPainter {
 
 extension on Path<LatLng> {
   computeMetrics() {}
-  
-  void cubicTo(double dx, double dy, double dx2, double dy2, double dx3, double dy3) {}
-  
+
+  void cubicTo(
+    double dx,
+    double dy,
+    double dx2,
+    double dy2,
+    double dx3,
+    double dy3,
+  ) {}
+
   void moveTo(double dx, double dy) {}
 }

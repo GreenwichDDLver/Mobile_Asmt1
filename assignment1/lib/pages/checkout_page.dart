@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
 import '../models/MenuItem.dart';
 import '../models/RestaurantList.dart';
+import '../services/order_service.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -94,37 +95,115 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  void _confirmOrder() {
+  void _confirmOrder() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // 这里可以添加实际的订单提交逻辑
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Order Confirmed!'),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 64),
-                SizedBox(height: 16),
-                Text('Your order has been placed successfully!'),
-                Text('Estimated delivery: 30-45 minutes'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  // 清空购物车
-                  Provider.of<CartModel>(context, listen: false).clear();
-                  // 返回到主页面
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                child: const Text('OK'),
+      try {
+        // 显示加载对话框
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+              content: Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('正在创建订单...'),
+                ],
               ),
-            ],
-          );
-        },
-      );
+            );
+          },
+        );
+
+        final cart = Provider.of<CartModel>(context, listen: false);
+        final subtotal = cart.totalPrice;
+        final tax = subtotal * _taxRate;
+        final deliveryFee = _getDeliveryFee(cart.currentRestaurant);
+        final discount =
+            _isPromoApplied
+                ? (_promoDiscount < 1
+                    ? subtotal * _promoDiscount
+                    : _promoDiscount)
+                : 0.0;
+        final total = subtotal + tax + deliveryFee - discount;
+
+        // 创建订单
+        String orderId = await OrderService.createOrder(
+          cart: cart,
+          customerName: _nameController.text.trim(),
+          customerPhone: _phoneController.text.trim(),
+          customerAddress: _addressController.text.trim(),
+          paymentMethod: _selectedPaymentMethod,
+          subtotal: subtotal,
+          tax: tax,
+          deliveryFee: deliveryFee,
+          discount: discount,
+          finalTotal: total,
+        );
+
+        // 关闭加载对话框
+        Navigator.of(context).pop();
+
+        // 显示成功对话框
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('订单确认成功！'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.green, size: 64),
+                  const SizedBox(height: 16),
+                  const Text('您的订单已成功创建！'),
+                  const Text('预计配送时间: 30-45分钟'),
+                  const SizedBox(height: 8),
+                  Text(
+                    '订单号: $orderId',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    // 清空购物车
+                    Provider.of<CartModel>(context, listen: false).clear();
+                    // 返回到主页面
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
+        );
+      } catch (e) {
+        // 关闭加载对话框
+        Navigator.of(context).pop();
+
+        // 显示错误对话框
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('订单创建失败'),
+              content: Text('创建订单时发生错误: $e'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
