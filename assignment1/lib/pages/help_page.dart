@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
@@ -10,7 +12,10 @@ class HelpPage extends StatefulWidget {
 class _HelpPageState extends State<HelpPage> {
   final TextEditingController _feedbackController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  bool _isSubmittingFeedback = false;
   final List<Map<String, String>> _faqs = [
     {
       'question': 'How do I track my order?',
@@ -51,6 +56,191 @@ class _HelpPageState extends State<HelpPage> {
     _feedbackController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Email is optional
+    }
+    
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+    
+    return null;
+  }
+
+  Future<void> _submitFeedbackToFirebase() async {
+    String feedback = _feedbackController.text.trim();
+    String email = _emailController.text.trim();
+    
+    if (feedback.isEmpty) {
+      _showErrorSnackBar('Please enter your feedback before submitting');
+      return;
+    }
+
+    // Validate email if provided
+    String? emailError = _validateEmail(email);
+    if (emailError != null) {
+      _showErrorSnackBar(emailError);
+      return;
+    }
+
+    setState(() {
+      _isSubmittingFeedback = true;
+    });
+
+    try {
+      // Get current user info if logged in
+      User? currentUser = _auth.currentUser;
+      String? userId = currentUser?.uid;
+      String? userEmail = currentUser?.email;
+
+      // Prepare feedback data
+      Map<String, dynamic> feedbackData = {
+        'feedback': feedback,
+        'contactEmail': email.isNotEmpty ? email.toLowerCase() : null,
+        'submittedAt': FieldValue.serverTimestamp(),
+        'status': 'pending', // pending, reviewed, resolved
+        'userId': userId,
+        'userEmail': userEmail,
+        'platform': 'mobile_app',
+      };
+
+      // Add feedback to Firestore
+      DocumentReference docRef = await _firestore
+          .collection('feedback')
+          .add(feedbackData);
+
+      // Show success dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green.shade600),
+                  const SizedBox(width: 8),
+                  const Text('Thank You!'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Your feedback has been submitted successfully.'),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Reference ID: ${docRef.id.substring(0, 8).toUpperCase()}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('We appreciate your input and will use it to improve our service.'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                    _emailController.clear();
+                  },
+                  child: const Text('OK', style: TextStyle(color: Colors.orange)),
+                ),
+              ],
+            );
+          },
+        );
+      }
+
+    } catch (e) {
+      print('Error submitting feedback: $e');
+      _showErrorSnackBar('Failed to submit feedback. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingFeedback = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _submitIssueReport(String issueType) async {
+    try {
+      // Get current user info if logged in
+      User? currentUser = _auth.currentUser;
+      String? userId = currentUser?.uid;
+      String? userEmail = currentUser?.email;
+
+      // Prepare issue report data
+      Map<String, dynamic> issueData = {
+        'issueType': issueType,
+        'reportedAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'userId': userId,
+        'userEmail': userEmail,
+        'platform': 'mobile_app',
+        'priority': _getIssuePriority(issueType),
+      };
+
+      // Add issue report to Firestore
+      DocumentReference docRef = await _firestore
+          .collection('issue_reports')
+          .add(issueData);
+
+      _showSuccessSnackBar('Issue reported successfully. Reference: ${docRef.id.substring(0, 8).toUpperCase()}');
+
+    } catch (e) {
+      print('Error reporting issue: $e');
+      _showErrorSnackBar('Failed to report issue. Please try again.');
+    }
+  }
+
+  String _getIssuePriority(String issueType) {
+    switch (issueType.toLowerCase()) {
+      case 'payment issue':
+        return 'high';
+      case 'food quality issue':
+        return 'medium';
+      case 'delivery problem':
+        return 'medium';
+      default:
+        return 'low';
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
+  }
+
+  void _showSuccessSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 
   @override
@@ -296,13 +486,22 @@ class _HelpPageState extends State<HelpPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _submitFeedback,
+                onPressed: _isSubmittingFeedback ? null : _submitFeedbackToFirebase,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: const Text('Submit Feedback'),
+                child: _isSubmittingFeedback
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Submit Feedback'),
               ),
             ),
           ],
@@ -325,7 +524,7 @@ class _HelpPageState extends State<HelpPage> {
                 title: const Text('Food Quality Issue'),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSnackBar('Reporting food quality issue...');
+                  _submitIssueReport('Food Quality Issue');
                 },
               ),
               ListTile(
@@ -333,7 +532,7 @@ class _HelpPageState extends State<HelpPage> {
                 title: const Text('Delivery Problem'),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSnackBar('Reporting delivery problem...');
+                  _submitIssueReport('Delivery Problem');
                 },
               ),
               ListTile(
@@ -341,7 +540,7 @@ class _HelpPageState extends State<HelpPage> {
                 title: const Text('Payment Issue'),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSnackBar('Reporting payment issue...');
+                  _submitIssueReport('Payment Issue');
                 },
               ),
               ListTile(
@@ -349,7 +548,7 @@ class _HelpPageState extends State<HelpPage> {
                 title: const Text('Other Issue'),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSnackBar('Reporting other issue...');
+                  _submitIssueReport('Other Issue');
                 },
               ),
             ],
@@ -358,34 +557,6 @@ class _HelpPageState extends State<HelpPage> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _submitFeedback() {
-    if (_feedbackController.text.trim().isEmpty) {
-      _showSnackBar('Please enter your feedback before submitting');
-      return;
-    }
-
-    // Simulate feedback submission
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Thank You!'),
-          content: const Text('Your feedback has been submitted successfully. We appreciate your input and will use it to improve our service.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _feedbackController.clear();
-                _emailController.clear();
-              },
-              child: const Text('OK', style: TextStyle(color: Colors.orange)),
             ),
           ],
         );
