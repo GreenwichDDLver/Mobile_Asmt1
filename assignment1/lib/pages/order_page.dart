@@ -41,7 +41,7 @@ class _OrderPageState extends State<OrderPage>
     try {
       await OrderService.initializeSampleOrders();
     } catch (e) {
-      print('初始化示例订单失败: $e');
+      print('Failed to initialize sample order: $e');
     }
   }
 
@@ -76,10 +76,10 @@ class _OrderPageState extends State<OrderPage>
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: Colors.orange[100],
-        title: const Text('我的订单'),
+        title: const Text('My Orders'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [Tab(text: '当前订单'), Tab(text: '订单历史')],
+          tabs: const [Tab(text: 'Current Orders'), Tab(text: 'Order History')],
         ),
         flexibleSpace: Container(
           padding: const EdgeInsets.only(top: 40, left: 16, right: 16),
@@ -125,7 +125,7 @@ class _OrderPageState extends State<OrderPage>
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('加载订单失败: ${snapshot.error}'));
+          return Center(child: Text('Failed to load order: ${snapshot.error}'));
         }
 
         List<OrderModel> currentOrders = snapshot.data ?? [];
@@ -301,11 +301,11 @@ class _OrderPageState extends State<OrderPage>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildLegendItem(Colors.blue, '餐厅'),
+                    _buildLegendItem(Colors.blue, 'Restaurant'),
                     const SizedBox(width: 8),
-                    _buildLegendItem(Colors.orange, '骑手'),
+                    _buildLegendItem(Colors.orange, 'Rider'),
                     const SizedBox(width: 8),
-                    _buildLegendItem(Colors.green, '您'),
+                    _buildLegendItem(Colors.green, 'You'),
                   ],
                 ),
               ),
@@ -476,7 +476,7 @@ class _OrderPageState extends State<OrderPage>
               Icon(Icons.receipt_long, size: 64, color: Colors.grey),
               SizedBox(height: 16),
               Text(
-                '暂无当前订单',
+                'No current orders exist',
                 style: TextStyle(fontSize: 18, color: Colors.grey),
               ),
             ],
@@ -505,7 +505,7 @@ class _OrderPageState extends State<OrderPage>
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('加载订单历史失败: ${snapshot.error}'));
+          return Center(child: Text('Failed to load order history: ${snapshot.error}'));
         }
 
         List<OrderModel> orderHistory = snapshot.data ?? [];
@@ -519,7 +519,7 @@ class _OrderPageState extends State<OrderPage>
                   Icon(Icons.history, size: 64, color: Colors.grey),
                   SizedBox(height: 16),
                   Text(
-                    '暂无订单历史',
+                    'No order history exist',
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
@@ -599,7 +599,7 @@ class _OrderPageState extends State<OrderPage>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '订单号: ${order.id}',
+                        'Order Number: ${order.id}',
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
@@ -632,7 +632,7 @@ class _OrderPageState extends State<OrderPage>
                 if (order.status == 'Completed' || order.status == 'Cancelled')
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: '删除订单',
+                    tooltip: 'Delete order',
                     onPressed: () => _showDeleteOrderDialog(order),
                   ),
               ],
@@ -683,7 +683,7 @@ class _OrderPageState extends State<OrderPage>
                                     ),
                                   ),
                                   Text(
-                                    '数量: ${item.quantity}',
+                                    'Quantity: ${item.quantity}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],
@@ -708,13 +708,13 @@ class _OrderPageState extends State<OrderPage>
                 const Divider(),
                 // 费用明细
                 if (order.subtotal != null)
-                  _buildOrderPriceRow('商品小计', order.subtotal!),
-                if (order.tax != null) _buildOrderPriceRow('税费', order.tax!),
+                  _buildOrderPriceRow('Subtotal of goods', order.subtotal!),
+                if (order.tax != null) _buildOrderPriceRow('Taxes', order.tax!),
                 if (order.deliveryFee != null)
-                  _buildOrderPriceRow('配送费', order.deliveryFee!),
+                  _buildOrderPriceRow('Delivery Fee', order.deliveryFee!),
                 if (order.discount != null && order.discount != 0)
                   _buildOrderPriceRow(
-                    '优惠',
+                    'Discount',
                     -order.discount!,
                     color: Colors.green,
                   ),
@@ -723,7 +723,7 @@ class _OrderPageState extends State<OrderPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      '总计:',
+                      'Total:',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -753,7 +753,7 @@ class _OrderPageState extends State<OrderPage>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '预计 ${order.timeLeft!.inMinutes} 分钟送达',
+                          'Expected ${order.timeLeft!.inMinutes} delivered',
                           style: const TextStyle(
                             color: Colors.orange,
                             fontWeight: FontWeight.bold,
@@ -783,7 +783,7 @@ class _OrderPageState extends State<OrderPage>
                                 backgroundColor: Colors.orange,
                                 foregroundColor: Colors.white,
                               ),
-                              child: const Text('评价订单'),
+                              child: const Text('Review order'),
                             ),
                           ),
                         ],
@@ -800,12 +800,12 @@ class _OrderPageState extends State<OrderPage>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除订单'),
-            content: const Text('是否永久删除此订单？此操作不可恢复。'),
+            title: const Text('Delete order'),
+            content: const Text('Do you want to permanently delete this order? This operation cannot be undone.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {
@@ -813,7 +813,7 @@ class _OrderPageState extends State<OrderPage>
                   await OrderService.deleteOrder(order.id);
                   setState(() {}); // 刷新页面
                 },
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: const Text('Delete', style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
@@ -850,7 +850,7 @@ class _OrderPageState extends State<OrderPage>
                 controller: _reviewController,
                 maxLines: 3,
                 decoration: const InputDecoration(
-                  labelText: '评价内容',
+                  labelText: 'Rating',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -859,7 +859,7 @@ class _OrderPageState extends State<OrderPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
+              child: const Text('Cancle'),
             ),
             TextButton(
               onPressed: () async {
@@ -871,7 +871,7 @@ class _OrderPageState extends State<OrderPage>
                 );
                 setState(() {});
               },
-              child: const Text('提交', style: TextStyle(color: Colors.orange)),
+              child: const Text('Submit', style: TextStyle(color: Colors.orange)),
             ),
           ],
         );
@@ -938,13 +938,13 @@ class _OrderPageState extends State<OrderPage>
   String _getStatusText(String status) {
     switch (status) {
       case 'Preparing':
-        return '准备中';
+        return 'Preparing';
       case 'Out for Delivery':
-        return '配送中';
+        return 'Delivering';
       case 'Completed':
-        return '已完成';
+        return 'Completed';
       case 'Cancelled':
-        return '已取消';
+        return 'Cancelled';
       default:
         return status;
     }

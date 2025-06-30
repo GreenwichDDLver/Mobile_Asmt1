@@ -8,33 +8,33 @@ class FirebaseTest {
       await FirebaseFirestore.instance.collection('test').limit(1).get();
       return true;
     } catch (e) {
-      print('Firebase连接测试失败: $e');
+      print('Firebase connection test failed: $e');
       return false;
     }
   }
 
   static Future<void> testOrderService() async {
     try {
-      print('开始测试订单服务...');
+      print('Start testing the order service...');
 
       // 测试初始化示例订单
       await OrderService.initializeSampleOrders();
-      print('示例订单初始化成功');
+      print('Sample order initialization successful');
 
       // 测试获取订单流
       final ordersStream = OrderService.getOrders();
       await for (final orders in ordersStream.take(1)) {
-        print('获取到 ${orders.length} 个订单');
+        print('Get ${orders.length} orders');
         for (final order in orders) {
           print(
-            '订单ID: ${order.id}, 餐厅: ${order.shopName}, 状态: ${order.status}',
+            'OrderID: ${order.id}, Restaurant: ${order.shopName}, Status: ${order.status}',
           );
         }
       }
 
-      print('订单服务测试完成');
+      print('Order service test completed');
     } catch (e) {
-      print('订单服务测试失败: $e');
+      print('Order service test failed: $e');
     }
   }
 }
