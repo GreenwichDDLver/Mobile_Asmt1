@@ -288,45 +288,25 @@ class _MenuPageState extends State<MenuPage> {
                     MaterialPageRoute(builder: (context) => const CheckoutPage()),
                   );
                 },
+                onCartPressed: () {
+                  setState(() {
+                    _showCartPanel = true;
+                  });
+                },
               ),
             ],
           ),
-          Positioned(
-            bottom: 100,
-            right: 20,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _showCartPanel = true;
-                });
-              },
-              child: Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 6,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Icon(Icons.shopping_cart, color: Colors.orange, size: 32),
-                ),
-              ),
-            ),
-          ),
           if (_showCartPanel)
-            CartPanel(
-              onClose: () {
-                setState(() {
-                  _showCartPanel = false;
-                });
-              },
+            Positioned(
+              bottom: 120,
+              left: 20,  // 改为左边显示
+              child: CartPanel(
+                onClose: () {
+                  setState(() {
+                    _showCartPanel = false;
+                  });
+                },
+              ),
             ),
         ],
       ),

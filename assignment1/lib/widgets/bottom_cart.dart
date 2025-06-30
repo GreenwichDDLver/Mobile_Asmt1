@@ -4,8 +4,13 @@ import '../models/cart_model.dart';
 
 class BottomCart extends StatelessWidget {
   final VoidCallback onCheckoutPressed;
+  final VoidCallback onCartPressed;
 
-  const BottomCart({super.key, required this.onCheckoutPressed});
+  const BottomCart({
+    super.key, 
+    required this.onCheckoutPressed,
+    required this.onCartPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +31,18 @@ class BottomCart extends StatelessWidget {
                 )
               ],
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.shopping_cart_outlined, 
-                     size: 28, 
-                     color: Colors.grey),
-                SizedBox(width: 12),
-                Expanded(
+                GestureDetector(
+                  onTap: onCartPressed,
+                  child: const Icon(
+                    Icons.shopping_cart_outlined, 
+                    size: 28, 
+                    color: Colors.grey
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
                   child: Text(
                     'Your cart is empty',
                     style: TextStyle(
@@ -62,9 +72,14 @@ class BottomCart extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.shopping_cart_outlined, 
-                         size: 28, 
-                         color: Colors.orange),
+              GestureDetector(
+                onTap: onCartPressed,
+                child: const Icon(
+                  Icons.shopping_cart_outlined, 
+                  size: 28, 
+                  color: Colors.orange
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

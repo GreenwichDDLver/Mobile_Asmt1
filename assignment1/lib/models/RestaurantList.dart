@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class RestaurantListModel {
   final String name;
-  final String iconPath; // 代替 iconPath
-  final String score;     // 原来的 score
-  final String duration; // 原来的 duration
-  final String fee;  // 原来的 fee
+  final String iconPath; 
+  final String score;     
+  final String duration; 
+  final String fee;  
   final Color boxColor;
 
   RestaurantListModel({
