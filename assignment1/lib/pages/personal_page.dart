@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'settings_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonalHomePage extends StatefulWidget {
   const PersonalHomePage({super.key});
@@ -9,7 +11,45 @@ class PersonalHomePage extends StatefulWidget {
 }
 
 class _PersonalHomePageState extends State<PersonalHomePage> with TickerProviderStateMixin {
-  final String _userName = 'Zhang San';
+  String _userName = 'Loading...'; // Changed default value
+  String _userEmail = 'Loading...'; // Add email field
+
+  // Fetch user info from Firebase
+  Future<void> _getUserInfo() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists && doc.data() != null) {
+          setState(() {
+            _userName = doc.data()!['username'] ?? 'Unknown User';
+            _userEmail = user.email ?? 'No email';
+          });
+        } else {
+          setState(() {
+            _userName = 'Unknown User';
+            _userEmail = user.email ?? 'No email';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _userName = 'Error loading user';
+          _userEmail = user.email ?? 'No email';
+        });
+      }
+    } else {
+      setState(() {
+        _userName = 'Not logged in';
+        _userEmail = 'No email';
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo();
+  }
 
   // Coupon data
   final List<Map<String, dynamic>> _unusedCoupons = [
@@ -188,24 +228,7 @@ class _PersonalHomePageState extends State<PersonalHomePage> with TickerProvider
                   icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                 ),
-                GestureDetector(
-                  onTap: () => _navigateToDetailedProfile(),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
-                    ),
-                    child: const Text(
-                      'Profile',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                const SizedBox(width: 48),
               ],
             ),
             
@@ -215,7 +238,9 @@ class _PersonalHomePageState extends State<PersonalHomePage> with TickerProvider
             Row(
               children: [
                 // Avatar
-                Container(
+                GestureDetector(
+                onTap: () => _navigateToDetailedProfile(),
+                child: Container(
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
@@ -240,7 +265,7 @@ class _PersonalHomePageState extends State<PersonalHomePage> with TickerProvider
                     ),
                   ),
                 ),
-                
+              ),
                 const SizedBox(width: 15),
                 
                 // Name
@@ -828,9 +853,47 @@ class DetailedProfilePage extends StatefulWidget {
 }
 
 class _DetailedProfilePageState extends State<DetailedProfilePage> {
-  String _userName = 'Zhang San.';
-  String _userEmail = 'Zhangsan@email.com';
+  String _userName = 'Loading...';
+  String _userEmail = 'Loading...';
   String _deliveryAddress = '123 Main Street, Shanghai, China';
+
+  Future<void> _getUserInfo() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (doc.exists && doc.data() != null) {
+          setState(() {
+            _userName = doc.data()!['username'] ?? 'Unknown User';
+            _userEmail = user.email ?? 'No email';
+            // You can also fetch delivery address from Firebase if stored there
+            _deliveryAddress = doc.data()!['address'] ?? '123 Main Street, Shanghai, China';
+          });
+        } else {
+          setState(() {
+            _userName = 'Unknown User';
+            _userEmail = user.email ?? 'No email';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _userName = 'Error loading user';
+          _userEmail = user.email ?? 'No email';
+        });
+      }
+    } else {
+      setState(() {
+        _userName = 'Not logged in';
+        _userEmail = 'No email';
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo();
+  }
   
   final List<Map<String, dynamic>> _favoriteRestaurants = [
     {
@@ -888,6 +951,19 @@ class _DetailedProfilePageState extends State<DetailedProfilePage> {
   }
 
   Widget _buildProfileHeader() {
+    var image = Image.asset(
+      'assets/images/UserImage.jpg',
+      width: 100,
+      height: 100,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(
+          Icons.person,
+          size: 50,
+          color: Colors.white,
+        );
+      },
+    );
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -943,19 +1019,7 @@ class _DetailedProfilePageState extends State<DetailedProfilePage> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                    child: Image.asset(
-                      'assets/images/UserImage.jpg',
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Colors.white,
-                        );
-                      },
-                    ),
+                    child: image,
                   ),
                 ),
                 
